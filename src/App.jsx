@@ -1,12 +1,13 @@
-import './App.css'
+import React from "react";
+import Login from "./components/auth/Login";
 
-function App() {
-
-  return (
-    <div>
-      <h1>DataVista Frontend</h1>
-    </div>
-  )
-}
+function App() { 
+  return ( 
+  <div> 
+     <Login />
+    
+  </div> 
+); 
+} 
 
 export default App;
