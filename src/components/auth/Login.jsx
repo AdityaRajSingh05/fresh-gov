@@ -41,7 +41,7 @@ const Login = () => {
 
         {/* Header */}
         <h2 className="mb-2 text-2xl font-bold text-center text-gray-800 sm:text-3xl lg:text-4xl">
-          Welcome Back 👋
+          Welcome Back
         </h2>
         <p className="mb-6 text-sm text-center text-gray-500 sm:text-base">
           Please login to your account
@@ -59,7 +59,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-4 py-2 text-gray-800 placeholder-gray-600 bg-pink-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-gray-800 placeholder-gray-600 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -73,8 +73,7 @@ const Login = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-4 py-2 text-gray-800 placeholder-gray-600 bg-teal-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-gray-800 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
