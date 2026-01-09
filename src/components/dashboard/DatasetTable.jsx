@@ -1,8 +1,4 @@
 import { datasets, Dataset } from '../../data/mockData';
-
-
-
-
 const getClassificationStyle = (classification) => {
   switch (classification) {
     case 'Sensitive':
