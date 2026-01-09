@@ -1,13 +1,26 @@
+// App.jsx
 import React from "react";
-import Login from "./components/auth/Login";
+import { Routes, Route, Navigate } from "react-router-dom";
+import DataRegistrationPage from "./DataRegistrationPage";
 
-function App() { 
-  return ( 
-  <div> 
-     <Login />
-    
-  </div> 
-); 
-} 
+/**
+ * App component sets up client-side routes using React Router v6.
+ * - "/" redirects to /register
+ * - "/register" renders the DataRegistrationPage
+ * Add more routes as your app grows.
+ */
+export default function App() {
+  return (
+    <Routes>
+      {/* Redirect root to register page */}
+      <Route path="/" element={<Navigate to="/register" replace />} />
 
-export default App;
+      {/* Main registration route */}
+      <Route path="/register" element={<DataRegistrationPage />} />
+
+      {/* Fallback 404 route (simple) */}
+      <Route path="*" element={<div className="p-8">Page not found</div>} />
+    </Routes>
+  );
+}
+
