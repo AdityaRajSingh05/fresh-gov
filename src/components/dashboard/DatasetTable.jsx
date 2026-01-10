@@ -1,73 +1,93 @@
-import { datasets, Dataset } from '../../data/mockData';
-const getClassificationStyle = (classification) => {
+const mockDatasets = [
+  {
+    id: 1,
+    name: 'external_leads_feed',
+    domain: 'Sales',
+    classification: 'Sensitive',
+    sourceType: 'CSV',
+  },
+  {
+    id: 2,
+    name: 'central_customer_360',
+    domain: 'Finance',
+    classification: 'Confidential',
+    sourceType: 'JSON',
+  },
+  {
+    id: 3,
+    name: 'mkt_segment_export',
+    domain: 'Finance',
+    classification: 'Internal',
+    sourceType: 'XML',
+  },
+  {
+    id: 4,
+    name: 'promo_reward_catalog',
+    domain: 'Operations',
+    classification: 'Confidential',
+    sourceType: 'JSON',
+  },
+];
+
+const getClassificationClass = (classification) => {
   switch (classification) {
     case 'Sensitive':
-      return 'text-classification-sensitive';
+      return 'sensitive';
     case 'Confidential':
-      return 'text-classification-confidential';
+      return 'confidential';
     case 'Internal':
-      return 'text-classification-internal';
+      return 'internal';
     default:
-      return 'text-foreground';
+      return '';
   }
 };
 
-const DatasetTable = () => {
+function DatasetTable () {
   return (
-    <div className="bg-card rounded-xl border border-border shadow-card">
+    <div className="bg-card rounded-xl border border-border">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border">
-        <h2 className="text-base md:text-lg font-semibold text-foreground">Registered Dataset</h2>
-        <button
-          className="px-3 md:px-4 py-2 text-sm font-medium text-foreground bg-background
-                     border border-border rounded-lg hover:bg-muted transition-colors duration-200"
-        >
-          View All
-        </button>
+      <div className="flex items-center justify-between p-6 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">
+          Registered Dataset
+        </h2>
+        <button className="view-all-btn">View All</button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-150">
-          <thead>
-            <tr className="bg-muted">
-              <th className="px-4 md:px-6 py-3 text-left text-xs md:text-sm font-semibold text-foreground">
-                Name
-              </th>
-              <th className="px-4 md:px-6 py-3 text-left text-xs md:text-sm font-semibold text-foreground">
-                Domain
-              </th>
-              <th className="px-4 md:px-6 py-3 text-left text-xs md:text-sm font-semibold text-foreground">
-                Classification
-              </th>
-              <th className="px-4 md:px-6 py-3 text-left text-xs md:text-sm font-semibold text-foreground">
-                Source Type
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {datasets.map((dataset) => (
-              <tr
-                key={dataset.id}
-                className="hover:bg-muted/50 transition-colors duration-150"
-              >
-                <td className="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm text-foreground font-medium">
-                  {dataset.name}
-                </td>
-                <td className="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm text-muted-foreground">
-                  {dataset.domain}
-                </td>
-                <td className={`px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium ${getClassificationStyle(dataset.classification)}`}>
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Domain</th>
+            <th>Classification</th>
+            <th>Source Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {mockDatasets.map((dataset) => (
+            <tr key={dataset.id}>
+              <td className="font-medium text-foreground">
+                {dataset.name}
+              </td>
+              <td className="text-muted-foreground">
+                {dataset.domain}
+              </td>
+              <td>
+                <span
+                  className={`classification-badge ${getClassificationClass(
+                    dataset.classification
+                  )}`}
+                >
                   {dataset.classification}
-                </td>
-                <td className="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm text-muted-foreground">
-                  {dataset.sourceType}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </span>
+              </td>
+              <td className="text-muted-foreground">
+                {dataset.sourceType}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
