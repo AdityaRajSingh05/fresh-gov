@@ -108,38 +108,76 @@
 
 
 // NEW CODE:- 
+// import React from 'react';
+// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// // 1. PATH FIXED: Based on your image, context is directly in src/context/
+// import { AuthProvider } from './context/AuthContext';
+
+// // 2. PATH FIXED: Pages in src/pages/
+// import LoginPage from './pages/LoginPage';
+// import NotFoundPage from './pages/NotFoundPage.jsx';
+
+// // 3. PATH FIXED: Pages in src/components/pages/
+// import DataStewardDashboard from './components/pages/DataStewardDashboard';
+// import DataRegistrationPage from './components/pages/DataRegistrationPage';
+// import GovernancePolicy from './components/pages/GovernancePolicy';
+
+// function App() {
+//   return (
+//     /* The AuthProvider must wrap the Router to fix the Header error */
+//     <AuthProvider>
+//       <Router>
+//         <Routes>
+//           {/* Landing page */}
+//           <Route path="/" element={<LoginPage />} />
+          
+//           {/* Dashboard routes */}
+//           <Route path="/dashboard" element={<DataStewardDashboard />} />
+//           <Route path="/register" element={<DataRegistrationPage />} />
+//           <Route path="/governance" element={<GovernancePolicy />} />
+
+//           {/* Fallback routes */}
+//           <Route path="/404" element={<NotFoundPage />} />
+//           <Route path="*" element={<Navigate to="/404" />} />
+//         </Routes>
+//       </Router>
+//     </AuthProvider>
+//   );
+// }
+
+// export default App;
+
+
+
+
+
+
+
+
+
+
+// NEW CODE 1- RESPONSIVE:-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-// 1. PATH FIXED: Based on your image, context is directly in src/context/
 import { AuthProvider } from './context/AuthContext';
-
-// 2. PATH FIXED: Pages in src/pages/
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage.jsx';
-
-// 3. PATH FIXED: Pages in src/components/pages/
 import DataStewardDashboard from './components/pages/DataStewardDashboard';
 import DataRegistrationPage from './components/pages/DataRegistrationPage';
 import GovernancePolicy from './components/pages/GovernancePolicy';
 
 function App() {
   return (
-    /* The AuthProvider must wrap the Router to fix the Header error */
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Landing page */}
           <Route path="/" element={<LoginPage />} />
-          
-          {/* Dashboard routes */}
           <Route path="/dashboard" element={<DataStewardDashboard />} />
           <Route path="/register" element={<DataRegistrationPage />} />
           <Route path="/governance" element={<GovernancePolicy />} />
-
-          {/* Fallback routes */}
           <Route path="/404" element={<NotFoundPage />} />
-          <Route path="*" element={<Navigate to="/404" />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

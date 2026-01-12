@@ -151,9 +151,161 @@
 
 
 // NEW CODE:-
+// import React, { useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// // Path matches your structure: src/pages/LoginPage.jsx -> src/context/AuthContext.jsx
+// import { useAuth } from '../context/AuthContext'; 
+// import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
+// import logo from '../assets/logo.png'; 
+
+// const LoginPage = () => {
+//   const [showPassword, setShowPassword] = useState(false);
+//   const [formData, setFormData] = useState({ email: '', password: '' });
+  
+//   const navigate = useNavigate();
+  
+//   // Destructuring from your AuthContext.jsx
+//   // Using 'loading' and renaming 'error' to 'authError' to avoid confusion
+//   const { login, loading, error: authError } = useAuth(); 
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+    
+//     // Using the login function from your AuthContext
+//     const result = await login(formData.email, formData.password);
+
+//     if (result.success) {
+//       console.log("Login Successful");
+//       navigate('/dashboard'); 
+//     }
+//   };
+
+//   return (
+//     <div className="h-screen w-full bg-[#f1f5f9] font-inter flex items-center justify-center p-4 relative overflow-hidden">
+      
+//       {/* Background Graphics */}
+//       <div className="absolute inset-0 opacity-[0.05] pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" 
+//            style={{ backgroundImage: `linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)`, backgroundSize: '40px 40px' }}>
+//       </div>
+//       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-300/20 rounded-full blur-[120px] animate-[pulse_8s_infinite]"></div>
+//       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-300/20 rounded-full blur-[120px] animate-[pulse_10s_infinite]"></div>
+      
+//       <div className="w-full max-w-md z-10 flex flex-col items-center">
+        
+//         {/* Branding Area */}
+//         <div className="text-center mb-8">
+//           <div className="flex justify-center mb-6">
+//             <img src={logo} alt="Datavista Logo" className="h-24 w-auto object-contain drop-shadow-2xl" />
+//           </div>
+//           <h1 className="text-4xl font-black bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 bg-clip-text text-transparent tracking-tight">
+//             Welcome
+//           </h1>
+//           <div className="mt-3 flex items-center justify-center gap-2">
+//             <div className="h-[1px] w-8 bg-blue-200"></div>
+//             <p className="text-blue-800 font-bold uppercase tracking-[0.2em] text-[10px]">Datavista Catalog</p>
+//             <div className="h-[1px] w-8 bg-blue-200"></div>
+//           </div>
+//         </div>
+
+//         {/* Login Card */}
+//         <div className="w-full relative">
+//           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-[32px] blur-xl"></div>
+//           <div className="relative bg-white/95 backdrop-blur-sm border border-white rounded-[28px] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] overflow-hidden">
+//             <form className="p-10 space-y-6" onSubmit={handleSubmit}>
+              
+//               {/* Error Alert - Fixes 'authError' assigned but not used */}
+//               {authError && (
+//                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-xs font-semibold text-center animate-shake">
+//                   {authError}
+//                 </div>
+//               )}
+
+//               <div className="space-y-1.5">
+//                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Work Email</label>
+//                 <div className="relative group">
+//                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600">
+//                     <FiMail size={18} />
+//                   </div>
+//                   <input 
+//                     type="email" 
+//                     required
+//                     placeholder="name@company.com"
+//                     className="w-full !h-12 !pl-12 bg-slate-50/50 border border-slate-100 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none text-sm"
+//                     value={formData.email}
+//                     onChange={(e) => setFormData({...formData, email: e.target.value})}
+//                   />
+//                 </div>
+//               </div>
+
+//               <div className="space-y-1.5">
+//                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+//                 <div className="relative group">
+//                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600">
+//                     <FiLock size={18} />
+//                   </div>
+//                   <input 
+//                     type={showPassword ? "text" : "password"} 
+//                     required
+//                     placeholder="••••••••"
+//                     className="w-full !h-12 !pl-12 bg-slate-50/50 border border-slate-100 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none text-sm"
+//                     value={formData.password}
+//                     onChange={(e) => setFormData({...formData, password: e.target.value})}
+//                   />
+//                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-300 hover:text-blue-600 transition-colors cursor-pointer">
+//                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+//                   </button>
+//                 </div>
+//               </div>
+
+//               {/* Submit Button - Fixes 'loading' usage and 'isLoading' undefined */}
+//               <div className="pt-2">
+//                 <button 
+//                   type="submit" 
+//                   disabled={loading}
+//                   className={`group relative w-full ${loading ? 'bg-emerald-600' : 'bg-[#00a65a]'} text-white py-4 rounded-xl font-bold text-sm overflow-hidden shadow-xl shadow-emerald-900/20 transition-all active:scale-[0.98] cursor-pointer`}
+//                 >
+//                   <span className="relative z-10 flex items-center justify-center gap-2">
+//                     {loading ? (
+//                       <div className="flex items-center gap-2">
+//                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+//                         Authenticating...
+//                       </div>
+//                     ) : (
+//                       <>LogIn <FiArrowRight className="group-hover:translate-x-1 transition-transform" /></>
+//                     )}
+//                   </span>
+//                   {!loading && <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>}
+//                 </button>
+//               </div>
+//             </form>
+//           </div>
+//         </div>
+
+//         <div className="mt-10 flex flex-col items-center gap-3">
+//           <div className="h-[2px] w-6 bg-slate-200 rounded-full"></div>
+//           <p className="text-[10px] text-slate-400 font-bold tracking-[0.4em] uppercase">datavista @2026 all right reserved</p>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default LoginPage;
+
+
+
+
+
+
+
+
+
+
+
+
+// NEW CODE 1 :-  RESPONSIVE
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Path matches your structure: src/pages/LoginPage.jsx -> src/context/AuthContext.jsx
 import { useAuth } from '../context/AuthContext'; 
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
 import logo from '../assets/logo.png'; 
@@ -161,129 +313,73 @@ import logo from '../assets/logo.png';
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  
   const navigate = useNavigate();
-  
-  // Destructuring from your AuthContext.jsx
-  // Using 'loading' and renaming 'error' to 'authError' to avoid confusion
   const { login, loading, error: authError } = useAuth(); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Using the login function from your AuthContext
     const result = await login(formData.email, formData.password);
-
-    if (result.success) {
-      console.log("Login Successful");
-      navigate('/dashboard'); 
-    }
+    if (result.success) navigate('/dashboard'); 
   };
 
   return (
-    <div className="h-screen w-full bg-[#f1f5f9] font-inter flex items-center justify-center p-4 relative overflow-hidden">
-      
-      {/* Background Graphics */}
-      <div className="absolute inset-0 opacity-[0.05] pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" 
+    <div className="min-h-screen w-full bg-[#f1f5f9] font-inter flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+      {/* Background patterns hidden on small mobile for performance */}
+      <div className="absolute inset-0 opacity-[0.05] pointer-events-none hidden sm:block" 
            style={{ backgroundImage: `linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)`, backgroundSize: '40px 40px' }}>
       </div>
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-300/20 rounded-full blur-[120px] animate-[pulse_8s_infinite]"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-300/20 rounded-full blur-[120px] animate-[pulse_10s_infinite]"></div>
-      
-      <div className="w-full max-w-md z-10 flex flex-col items-center">
-        
-        {/* Branding Area */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <img src={logo} alt="Datavista Logo" className="h-24 w-auto object-contain drop-shadow-2xl" />
-          </div>
-          <h1 className="text-4xl font-black bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 bg-clip-text text-transparent tracking-tight">
-            Welcome
-          </h1>
-          <div className="mt-3 flex items-center justify-center gap-2">
-            <div className="h-[1px] w-8 bg-blue-200"></div>
-            <p className="text-blue-800 font-bold uppercase tracking-[0.2em] text-[10px]">Datavista Catalog</p>
-            <div className="h-[1px] w-8 bg-blue-200"></div>
-          </div>
+
+      <div className="w-full max-w-[440px] z-10">
+        <div className="text-center mb-6 md:mb-10">
+          <img src={logo} alt="Datavista" className="h-16 md:h-20 mx-auto mb-6 object-contain" />
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Welcome</h1>
+          <p className="text-blue-800 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Datavista Catalog</p>
         </div>
 
-        {/* Login Card */}
-        <div className="w-full relative">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-[32px] blur-xl"></div>
-          <div className="relative bg-white/95 backdrop-blur-sm border border-white rounded-[28px] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] overflow-hidden">
-            <form className="p-10 space-y-6" onSubmit={handleSubmit}>
-              
-              {/* Error Alert - Fixes 'authError' assigned but not used */}
-              {authError && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-xs font-semibold text-center animate-shake">
-                  {authError}
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Work Email</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600">
-                    <FiMail size={18} />
-                  </div>
-                  <input 
-                    type="email" 
-                    required
-                    placeholder="name@company.com"
-                    className="w-full !h-12 !pl-12 bg-slate-50/50 border border-slate-100 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none text-sm"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  />
-                </div>
+        <div className="bg-white/95 backdrop-blur-sm border border-white rounded-[24px] md:rounded-[32px] shadow-2xl overflow-hidden">
+          <form className="p-6 md:p-10 space-y-5 md:space-y-6" onSubmit={handleSubmit}>
+            {authError && (
+              <div className="p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs text-center font-bold">
+                {authError}
               </div>
+            )}
 
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600">
-                    <FiLock size={18} />
-                  </div>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    required
-                    placeholder="••••••••"
-                    className="w-full !h-12 !pl-12 bg-slate-50/50 border border-slate-100 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none text-sm"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-300 hover:text-blue-600 transition-colors cursor-pointer">
-                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Work Email</label>
+              <div className="relative group">
+                <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600" size={18} />
+                <input 
+                  type="email" required placeholder="name@company.com"
+                  className="w-full h-12 pl-12 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
               </div>
+            </div>
 
-              {/* Submit Button - Fixes 'loading' usage and 'isLoading' undefined */}
-              <div className="pt-2">
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className={`group relative w-full ${loading ? 'bg-emerald-600' : 'bg-[#00a65a]'} text-white py-4 rounded-xl font-bold text-sm overflow-hidden shadow-xl shadow-emerald-900/20 transition-all active:scale-[0.98] cursor-pointer`}
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        Authenticating...
-                      </div>
-                    ) : (
-                      <>LogIn <FiArrowRight className="group-hover:translate-x-1 transition-transform" /></>
-                    )}
-                  </span>
-                  {!loading && <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+              <div className="relative group">
+                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600" size={18} />
+                <input 
+                  type={showPassword ? "text" : "password"} required placeholder="••••••••"
+                  className="w-full h-12 pl-12 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-blue-600">
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
 
-        <div className="mt-10 flex flex-col items-center gap-3">
-          <div className="h-[2px] w-6 bg-slate-200 rounded-full"></div>
-          <p className="text-[10px] text-slate-400 font-bold tracking-[0.4em] uppercase">datavista @2026 all right reserved</p>
+            <button 
+              type="submit" disabled={loading}
+              className="w-full bg-[#00a65a] hover:bg-emerald-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              {loading ? "Authenticating..." : <>LogIn <FiArrowRight /></>}
+            </button>
+          </form>
         </div>
       </div>
     </div>
