@@ -607,9 +607,9 @@
 // NEW CODE:-
 
 import React, { useState } from 'react';
-import Sidebar from '../Sidebar'; 
-import Header from '../Header';
-import SidebarToggle from '../SidebarToggle';
+import Sidebar from '../components/Sidebar'; 
+import Header from '../components/Header';
+import SidebarToggle from '../components/SidebarToggle';
 import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX } from 'react-icons/fi';
 
 const DataRegistrationPage = () => {
@@ -897,3 +897,16 @@ const DataRegistrationPage = () => {
 };
 
 export default DataRegistrationPage;
+
+
+
+
+
+
+
+
+
+
+
+
+

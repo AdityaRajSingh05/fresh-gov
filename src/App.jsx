@@ -158,24 +158,124 @@
 
 
 // NEW CODE 1- RESPONSIVE:-
+// import React from 'react';
+// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+// import { AuthProvider } from './context/AuthContext';
+// import LoginPage from './pages/LoginPage';
+// import NotFoundPage from './pages/NotFoundPage.jsx';
+// import DataStewardDashboard from './components/pages/DataStewardDashboard';
+// import DataRegistrationPage from './components/pages/DataRegistrationPage';
+// import GovernancePolicy from './components/pages/GovernancePolicy';
+
+// function App() {
+//   return (
+//     <AuthProvider>
+//       <Router>
+//         <Routes>
+//           <Route path="/" element={<LoginPage />} />
+//           <Route path="/dashboard" element={<DataStewardDashboard />} />
+//           <Route path="/register" element={<DataRegistrationPage />} />
+//           <Route path="/governance" element={<GovernancePolicy />} />
+//           <Route path="/404" element={<NotFoundPage />} />
+//           <Route path="*" element={<Navigate to="/404" replace />} />
+//         </Routes>
+//       </Router>
+//     </AuthProvider>
+//   );
+// }
+
+// export default App;
+
+
+
+
+
+
+
+
+
+
+// NEW CODE 2 :- WITH MOCK SERVER:-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+// Import your Pages/Components
 import LoginPage from './pages/LoginPage';
-import NotFoundPage from './pages/NotFoundPage.jsx';
-import DataStewardDashboard from './components/pages/DataStewardDashboard';
-import DataRegistrationPage from './components/pages/DataRegistrationPage';
-import GovernancePolicy from './components/pages/GovernancePolicy';
+import DataStewardDashboard from './pages/DataStewardDashboard';
+import DataRegistrationPage from './pages/DataRegistrationPage';
+import GovernancePolicy from './pages/GovernancePolicy';
+import NotFoundPage from './pages/NotFoundPage';
+
+/**
+ * ProtectedRoute Component
+ * This component wraps any route that requires a user to be logged in.
+ * If the user is not authenticated, it redirects them to the Login page.
+ */
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  // While checking the authentication status (localStorage/Axios), show a loader
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-slate-50 font-inter">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-900 font-black tracking-widest uppercase text-xs">Loading Datavista...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no user is logged in, redirect to the Login page
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  // If user exists, render the requested page
+  return children;
+};
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Public Route: Login Page */}
           <Route path="/" element={<LoginPage />} />
-          <Route path="/dashboard" element={<DataStewardDashboard />} />
-          <Route path="/register" element={<DataRegistrationPage />} />
-          <Route path="/governance" element={<GovernancePolicy />} />
+          
+          {/* Protected Routes: 
+              These will only open if a user from your users.json 
+              successfully logs in via the AuthContext.
+          */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <DataStewardDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/register" 
+            element={
+              <ProtectedRoute>
+                <DataRegistrationPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/governance" 
+            element={
+              <ProtectedRoute>
+                <GovernancePolicy />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* 404 & Fallback Redirects */}
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>

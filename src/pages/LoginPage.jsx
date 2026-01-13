@@ -318,8 +318,11 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // result will now be based on axios response from mock server
     const result = await login(formData.email, formData.password);
-    if (result.success) navigate('/dashboard'); 
+    if (result.success) {
+      navigate('/dashboard');
+    }
   };
 
   return (

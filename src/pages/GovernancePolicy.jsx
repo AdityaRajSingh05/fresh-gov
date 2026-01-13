@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import HeaderClean from "../HeaderClean";
+import HeaderClean from "../components/HeaderClean";
 // SidebarClean removed — full-width layout used instead
 
 const SAMPLE_POLICIES = [
