@@ -161,16 +161,16 @@
 // const LoginPage = () => {
 //   const [showPassword, setShowPassword] = useState(false);
 //   const [formData, setFormData] = useState({ email: '', password: '' });
-  
+
 //   const navigate = useNavigate();
-  
+
 //   // Destructuring from your AuthContext.jsx
 //   // Using 'loading' and renaming 'error' to 'authError' to avoid confusion
 //   const { login, loading, error: authError } = useAuth(); 
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
-    
+
 //     // Using the login function from your AuthContext
 //     const result = await login(formData.email, formData.password);
 
@@ -182,16 +182,16 @@
 
 //   return (
 //     <div className="h-screen w-full bg-[#f1f5f9] font-inter flex items-center justify-center p-4 relative overflow-hidden">
-      
+
 //       {/* Background Graphics */}
 //       <div className="absolute inset-0 opacity-[0.05] pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" 
 //            style={{ backgroundImage: `linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)`, backgroundSize: '40px 40px' }}>
 //       </div>
 //       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-300/20 rounded-full blur-[120px] animate-[pulse_8s_infinite]"></div>
 //       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-300/20 rounded-full blur-[120px] animate-[pulse_10s_infinite]"></div>
-      
+
 //       <div className="w-full max-w-md z-10 flex flex-col items-center">
-        
+
 //         {/* Branding Area */}
 //         <div className="text-center mb-8">
 //           <div className="flex justify-center mb-6">
@@ -212,7 +212,7 @@
 //           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-[32px] blur-xl"></div>
 //           <div className="relative bg-white/95 backdrop-blur-sm border border-white rounded-[28px] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] overflow-hidden">
 //             <form className="p-10 space-y-6" onSubmit={handleSubmit}>
-              
+
 //               {/* Error Alert - Fixes 'authError' assigned but not used */}
 //               {authError && (
 //                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-xs font-semibold text-center animate-shake">
@@ -306,30 +306,36 @@
 // NEW CODE 1 :-  RESPONSIVE
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/AuthContext';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
-import logo from '../assets/logo.png'; 
+import logo from '../assets/logo.png';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const navigate = useNavigate();
-  const { login, loading, error: authError } = useAuth(); 
+  const { login, loading, error: authError } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     // result will now be based on axios response from mock server
     const result = await login(formData.email, formData.password);
     if (result.success) {
-      navigate('/dashboard');
+      // Route based on user role
+      const userRole = result.user?.role || 'data_steward';
+      if (userRole === 'compliance_officer') {
+        navigate('/compliance-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-[#f1f5f9] font-inter flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
       {/* Background patterns hidden on small mobile for performance */}
-      <div className="absolute inset-0 opacity-[0.05] pointer-events-none hidden sm:block" 
-           style={{ backgroundImage: `linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)`, backgroundSize: '40px 40px' }}>
+      <div className="absolute inset-0 opacity-[0.05] pointer-events-none hidden sm:block"
+        style={{ backgroundImage: `linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)`, backgroundSize: '40px 40px' }}>
       </div>
 
       <div className="w-full max-w-[440px] z-10">
@@ -351,11 +357,11 @@ const LoginPage = () => {
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Work Email</label>
               <div className="relative group">
                 <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600" size={18} />
-                <input 
+                <input
                   type="email" required placeholder="name@company.com"
                   className="w-full h-12 pl-12 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
             </div>
@@ -364,11 +370,11 @@ const LoginPage = () => {
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
               <div className="relative group">
                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600" size={18} />
-                <input 
+                <input
                   type={showPassword ? "text" : "password"} required placeholder="••••••••"
                   className="w-full h-12 pl-12 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-blue-600">
                   {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
@@ -376,7 +382,7 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <button 
+            <button
               type="submit" disabled={loading}
               className="w-full bg-[#00a65a] hover:bg-emerald-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
             >

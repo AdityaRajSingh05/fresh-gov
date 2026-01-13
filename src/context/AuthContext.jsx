@@ -134,8 +134,8 @@ export function AuthProvider({ children }) {
     setError(null);
     setLoading(true);
     try {
-      // UPDATED TO PORT 3000 based on your terminal image
-      const response = await axios.get("http://localhost:3000/users");
+      // Use the correct API endpoint from mock server
+      const response = await axios.get("http://localhost:3000/api/v1/users");
       const users = response.data;
 
       const foundUser = users.find(
@@ -149,12 +149,13 @@ export function AuthProvider({ children }) {
       const userData = {
         ...foundUser,
         name: `${foundUser.first_name} ${foundUser.last_name}`,
+        role: foundUser.role || 'data_steward', // Ensure role is stored
         loginTime: new Date().toISOString(),
       };
 
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
-      return { success: true };
+      return { success: true, user: userData };
     } catch (err) {
       // FIXED: Using 'err' so ESLint doesn't complain it is unused
       const message = err.response?.data?.message || err.message || "Login failed";

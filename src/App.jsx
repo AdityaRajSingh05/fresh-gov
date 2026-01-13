@@ -131,7 +131,7 @@
 //         <Routes>
 //           {/* Landing page */}
 //           <Route path="/" element={<LoginPage />} />
-          
+
 //           {/* Dashboard routes */}
 //           <Route path="/dashboard" element={<DataStewardDashboard />} />
 //           <Route path="/register" element={<DataRegistrationPage />} />
@@ -207,6 +207,13 @@ import DataRegistrationPage from './pages/DataRegistrationPage';
 import LineagePage from './pages/LineagePage'
 import NotFoundPage from './pages/NotFoundPage';
 
+// Import Compliance Pages
+import ComplianceDashboard from './pages/Compliance/Dashboard';
+import AuditLogs from './pages/Compliance/AuditLogs';
+import Violations from './pages/Compliance/Violations';
+import GovernancePolicy from './pages/GovernancePolicy';
+import DataQualityDashboard from './pages/DataQualityDashboard';
+
 
 /**
  * ProtectedRoute Component
@@ -215,7 +222,7 @@ import NotFoundPage from './pages/NotFoundPage';
  */
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   // While checking the authentication status (localStorage/Axios), show a loader
   if (loading) {
     return (
@@ -244,36 +251,83 @@ function App() {
         <Routes>
           {/* Public Route: Login Page */}
           <Route path="/" element={<LoginPage />} />
-          
+
           {/* Protected Routes: 
               These will only open if a user from your users.json 
               successfully logs in via the AuthContext.
           */}
-          <Route 
-            path="/dashboard" 
+          {/* Data Steward Routes */}
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <DataStewardDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/register" 
+
+          <Route
+            path="/register"
             element={
               <ProtectedRoute>
                 <DataRegistrationPage />
               </ProtectedRoute>
-            } 
+            }
           />
 
-          <Route path="/lineage" 
+          <Route path="/lineage"
             element={
-            <ProtectedRoute>
-            <LineagePage />
-            </ProtectedRoute>
-          }
-           />
+              <ProtectedRoute>
+                <LineagePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Compliance Officer Routes */}
+          <Route
+            path="/compliance-dashboard"
+            element={
+              <ProtectedRoute>
+                <ComplianceDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/audit-logs"
+            element={
+              <ProtectedRoute>
+                <AuditLogs />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/violations"
+            element={
+              <ProtectedRoute>
+                <Violations />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/governance"
+            element={
+              <ProtectedRoute>
+                <GovernancePolicy />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/quality"
+            element={
+              <ProtectedRoute>
+                <DataQualityDashboard />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 404 & Fallback Redirects */}
           <Route path="/404" element={<NotFoundPage />} />
