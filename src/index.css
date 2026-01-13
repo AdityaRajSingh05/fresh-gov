@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
 :root {
   --background: 210 20% 98%;
   --foreground: 222 47% 11%;
@@ -266,6 +264,14 @@ body {
   font-size: 0.875rem;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
+
+/* Hide placeholder text on media query */
+@media (max-width: 640px) {
+  .search-input::placeholder {
+    color: transparent;
+  }
+}
+
 .search-input:focus {
   outline: none;
   box-shadow: 0 0 0 4px hsl(var(--primary) / 0.08);
@@ -334,4 +340,10 @@ body {
     padding: 0.4rem 0.5rem;
     padding-left: 2rem;
   }
+}
+
+/* Custom cursor for Lineage Map */
+
+.cursor-lineage {
+  cursor: url("./assets/arrow-cursor.svg") 12 12, auto;
 }

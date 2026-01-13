@@ -204,8 +204,9 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import DataStewardDashboard from './pages/DataStewardDashboard';
 import DataRegistrationPage from './pages/DataRegistrationPage';
-import GovernancePolicy from './pages/GovernancePolicy';
+import LineagePage from './pages/LineagePage'
 import NotFoundPage from './pages/NotFoundPage';
+
 
 /**
  * ProtectedRoute Component
@@ -265,15 +266,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          
-          <Route 
-            path="/governance" 
+
+          <Route path="/lineage" 
             element={
-              <ProtectedRoute>
-                <GovernancePolicy />
-              </ProtectedRoute>
-            } 
-          />
+            <ProtectedRoute>
+            <LineagePage />
+            </ProtectedRoute>
+          }
+           />
 
           {/* 404 & Fallback Redirects */}
           <Route path="/404" element={<NotFoundPage />} />

@@ -606,26 +606,361 @@
 
 // NEW CODE:-
 
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
+// import Sidebar from '../components/Sidebar'; 
+// import Header from '../components/Header';
+// import SidebarToggle from '../components/SidebarToggle';
+// import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX } from 'react-icons/fi';
+
+// const DataRegistrationPage = () => {
+//   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+//   // --- State Management ---
+//   const [upstreams, setUpstreams] = useState([]);
+//   const [downstreams, setDownstreams] = useState([]);
+//   const [rules, setRules] = useState([]);
+  
+//   // Temporary inputs for adding items
+//   const [tempUpstream, setTempUpstream] = useState("");
+//   const [tempDownstream, setTempDownstream] = useState("");
+//   const [currentRule, setCurrentRule] = useState({ field: '', type: 'UNIQUE_CONSTRAINT', key: '', value: '' });
+
+//   // --- Handlers ---
+//   const addUpstream = () => {
+//     if (tempUpstream.trim()) {
+//       setUpstreams([...upstreams, tempUpstream]);
+//       setTempUpstream(""); 
+//     }
+//   };
+
+//   const addDownstream = () => {
+//     if (tempDownstream.trim()) {
+//       setDownstreams([...downstreams, tempDownstream]);
+//       setTempDownstream(""); 
+//     }
+//   };
+
+//   const handleAddRule = () => {
+//     if (currentRule.field.trim()) {
+//       setRules([...rules, { ...currentRule }]);
+//       setCurrentRule({ field: '', type: 'UNIQUE_CONSTRAINT', key: '', value: '' }); 
+//     }
+//   };
+
+//   const removeRule = (index) => {
+//     setRules(rules.filter((_, i) => i !== index));
+//   };
+
+//   return (
+//     <div className="flex min-h-screen bg-background font-inter">
+//       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
+//       <div className="flex-1 flex flex-col min-w-0">
+//         <div className="header-with-toggle">
+//           <SidebarToggle isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
+//           <Header />
+//         </div>
+
+//         <main className="flex-1 overflow-y-auto p-6 md:p-10">
+//           <div className="max-w-6xl mx-auto">
+//             <div className="flex items-center gap-4 mb-8">
+//               <div className="metric-icon blue">
+//                 <FiDatabase size={24} />
+//               </div>
+//               <h1 className="text-3xl font-bold text-foreground">Register Dataset</h1>
+//             </div>
+
+//             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+//               <form className="p-8 space-y-8" onSubmit={(e) => e.preventDefault()}>
+                
+//                 {/* 1. Basic Info: Owner, Dept, Source */}
+//                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Owner <span className="text-destructive ml-1">*</span></label>
+//                     <select className="search-input !pl-4 cursor-pointer"><option>-- Select Owner --</option></select>
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Department <span className="text-destructive ml-1">*</span></label>
+//                     <select className="search-input !pl-4 cursor-pointer"><option>-- Select Department --</option></select>
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Data Source <span className="text-destructive ml-1">*</span></label>
+//                     <select className="search-input !pl-4 cursor-pointer"><option>-- Select Data Source --</option></select>
+//                   </div>
+//                 </div>
+
+//                 {/* 2. Classification & Name */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Classification <span className="text-destructive ml-1">*</span></label>
+//                     <select className="search-input !pl-4 cursor-pointer">
+//                       <option>Public</option>
+//                       <option>Internal</option>
+//                       <option>Confidential</option>
+//                       <option>Sensitive</option>
+//                     </select>
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Dataset Name <span className="text-destructive ml-1">*</span></label>
+//                     <input type="text" placeholder="e.g., external_leads_feed" className="search-input !pl-4" />
+//                   </div>
+//                 </div>
+
+//                 {/* 3. Domain & Description */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Domain <span className="text-destructive ml-1">*</span></label>
+//                     <input type="text" placeholder="e.g., Sales" className="search-input !pl-4" />
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Short Description</label>
+//                     <input type="text" placeholder="Brief description of the dataset" className="search-input !pl-4" />
+//                   </div>
+//                 </div>
+
+//                 {/* 4. Owner Contact */}
+//                 <div className="max-w-md space-y-2">
+//                   <label className="text-sm font-semibold text-foreground">Owner Contact</label>
+//                   <input type="text" placeholder="owner email or slack" className="search-input !pl-4" />
+//                 </div>
+
+//                 <hr className="border-border" />
+
+//                 {/* 5. Upstream & Downstream Source */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  
+//                   {/* Upstream Section */}
+//                   <div className="space-y-4">
+//                     <div className="flex justify-between items-center">
+//                       <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+//                         Upstream Source <span className="text-destructive ml-1">*</span>
+//                       </h3>
+//                     </div>
+//                     {/* Tags */}
+//                     <div className="flex flex-wrap gap-2 min-h-[30px]">
+//                       {upstreams.length === 0 && <span className="text-xs text-muted-foreground italic">No sources added.</span>}
+//                       {upstreams.map((s, i) => (
+//                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-200">
+//                           {s} <FiX className="cursor-pointer hover:text-indigo-900" onClick={() => setUpstreams(upstreams.filter((_, idx) => idx !== i))} />
+//                         </span>
+//                       ))}
+//                     </div>
+//                     {/* Input */}
+//                     <div className="flex gap-2">
+//                       <input 
+//                         className="search-input !pl-4 flex-1" 
+//                         placeholder="Add source..." 
+//                         value={tempUpstream}
+//                         onChange={(e) => setTempUpstream(e.target.value)}
+//                       />
+//                       <button 
+//                         type="button" 
+//                         onClick={addUpstream} 
+//                         className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer transition-colors"
+//                       >
+//                         Add
+//                       </button>
+//                     </div>
+//                   </div>
+
+//                   {/* Downstream Section */}
+//                   <div className="space-y-4">
+//                     <div className="flex justify-between items-center">
+//                       <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+//                         Downstream Source <span className="text-destructive ml-1">*</span>
+//                       </h3>
+//                     </div>
+//                     {/* Tags */}
+//                     <div className="flex flex-wrap gap-2 min-h-[30px]">
+//                       {downstreams.length === 0 && <span className="text-xs text-muted-foreground italic">No sources added.</span>}
+//                       {downstreams.map((s, i) => (
+//                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-bold border border-purple-200">
+//                           {s} <FiX className="cursor-pointer hover:text-purple-900" onClick={() => setDownstreams(downstreams.filter((_, idx) => idx !== i))} />
+//                         </span>
+//                       ))}
+//                     </div>
+//                     {/* Input */}
+//                     <div className="flex gap-2">
+//                       <input 
+//                         className="search-input !pl-4 flex-1" 
+//                         placeholder="Add source..." 
+//                         value={tempDownstream}
+//                         onChange={(e) => setTempDownstream(e.target.value)}
+//                       />
+//                       <button 
+//                         type="button" 
+//                         onClick={addDownstream} 
+//                         className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer transition-colors"
+//                       >
+//                         Add
+//                       </button>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* 6. Validation Rules Section */}
+//                 <div className="space-y-4 border-t border-border pt-6">
+//                   <div className="flex justify-between items-center">
+//                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+//                       Validation Rules <span className="text-destructive ml-1">*</span>
+//                     </h3>
+//                   </div>
+                  
+//                   {/* Inputs */}
+//                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+//                     <input className="search-input !pl-4" placeholder="Field name" value={currentRule.field} onChange={(e) => setCurrentRule({...currentRule, field: e.target.value})} />
+//                     <select className="search-input !pl-4 cursor-pointer" value={currentRule.type} onChange={(e) => setCurrentRule({...currentRule, type: e.target.value})}>
+//                       <option>UNIQUE_CONSTRAINT</option>
+//                       <option>NOT_NULL</option>
+//                       <option>TYPE_CHECK</option>
+//                     </select>
+//                     <input className="search-input !pl-4" placeholder="arg key" value={currentRule.key} onChange={(e) => setCurrentRule({...currentRule, key: e.target.value})} />
+//                     <input className="search-input !pl-4" placeholder="arg value" value={currentRule.value} onChange={(e) => setCurrentRule({...currentRule, value: e.target.value})} />
+//                   </div>
+                  
+//                   <button 
+//                     type="button" 
+//                     onClick={handleAddRule}
+//                     className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer hover:bg-indigo-600 transition-all"
+//                   >
+//                     <FiPlus size={18} /> Add Rule
+//                   </button>
+
+//                   {/* NEW TABLE VIEW */}
+//                   {rules.length > 0 && (
+//                     <div className="border border-border rounded-lg overflow-hidden mt-2">
+//                       <table className="w-full text-sm text-left">
+//                         <thead className="bg-muted/50 text-xs uppercase text-muted-foreground font-semibold">
+//                           <tr>
+//                             <th className="px-4 py-3">Field Name</th>
+//                             <th className="px-4 py-3">Rule Type</th>
+//                             <th className="px-4 py-3">Arguments</th>
+//                             <th className="px-4 py-3 text-right">Action</th>
+//                           </tr>
+//                         </thead>
+//                         <tbody className="divide-y divide-border">
+//                           {rules.map((rule, index) => (
+//                             <tr key={index} className="hover:bg-muted/20 transition-colors">
+//                               <td className="px-4 py-2.5 font-medium text-foreground">{rule.field}</td>
+//                               <td className="px-4 py-2.5 text-muted-foreground">{rule.type}</td>
+//                               <td className="px-4 py-2.5 text-muted-foreground text-xs font-mono">
+//                                 {rule.key ? `${rule.key}: ${rule.value}` : <span className="text-muted-foreground/50">None</span>}
+//                               </td>
+//                               <td className="px-4 py-2.5 text-right">
+//                                 <button 
+//                                   onClick={() => removeRule(index)} 
+//                                   className="text-destructive hover:bg-red-50 p-1.5 rounded-md transition-colors cursor-pointer"
+//                                   title="Remove Rule"
+//                                 >
+//                                   <FiTrash2 size={16} />
+//                                 </button>
+//                               </td>
+//                             </tr>
+//                           ))}
+//                         </tbody>
+//                       </table>
+//                     </div>
+//                   )}
+                  
+//                   {/* JSON Preview Box */}
+//                   <div className="space-y-2 mt-4">
+//                     <p className="text-xs font-mono text-muted-foreground">JSON Preview</p>
+//                     <div className="bg-slate-950 p-4 rounded-md border border-slate-800">
+//                       <pre className="text-slate-200 font-mono text-sm overflow-x-auto">
+//                         {JSON.stringify(rules.length > 0 ? rules : {}, null, 2)}
+//                       </pre>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* Footer Buttons */}
+//                 <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-6 border-t border-border">
+//                   <div className="flex gap-4 w-full sm:w-auto">
+//                     <button type="submit" className="flex-1 sm:flex-none bg-[#00a65a] text-white px-8 py-3 rounded-md font-bold text-sm hover:brightness-105 transition-all cursor-pointer">
+//                       Register Dataset
+//                     </button>
+//                     <button 
+//                       type="reset" 
+//                       onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}}
+//                       className="flex-1 sm:flex-none bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer transition-all"
+//                     >
+//                       Reset
+//                     </button>
+//                   </div>
+//                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
+//                     <FiInfo className="text-primary" size={18} />
+//                     <span><strong>Tip:</strong> Add multiple upstream/downstream sources and validation rules as needed.</span>
+//                   </div>
+//                 </div>
+
+//               </form>
+//             </div>
+//           </div>
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DataRegistrationPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// NEW CODE:- WITH MOCK DATA SERVER:-
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Sidebar from '../components/Sidebar'; 
 import Header from '../components/Header';
 import SidebarToggle from '../components/SidebarToggle';
+import { useAuth } from '../context/AuthContext';
 import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX } from 'react-icons/fi';
 
 const DataRegistrationPage = () => {
+  const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
-  // --- State Management ---
+  // --- Form State ---
+  const [formData, setFormData] = useState({
+    name: '',
+    owner_unit_id: '',
+    department: '',
+    source_type: '',
+    classification: 'INTERNAL',
+    domain: '',
+    description: '',
+    owner_contact: ''
+  });
+
   const [upstreams, setUpstreams] = useState([]);
   const [downstreams, setDownstreams] = useState([]);
   const [rules, setRules] = useState([]);
   
-  // Temporary inputs for adding items
   const [tempUpstream, setTempUpstream] = useState("");
   const [tempDownstream, setTempDownstream] = useState("");
   const [currentRule, setCurrentRule] = useState({ field: '', type: 'UNIQUE_CONSTRAINT', key: '', value: '' });
 
+  const Required = () => <span className="text-destructive ml-1">*</span>;
+
   // --- Handlers ---
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const addUpstream = () => {
     if (tempUpstream.trim()) {
       setUpstreams([...upstreams, tempUpstream]);
@@ -647,8 +982,52 @@ const DataRegistrationPage = () => {
     }
   };
 
-  const removeRule = (index) => {
-    setRules(rules.filter((_, i) => i !== index));
+  const removeRule = (index) => setRules(rules.filter((_, i) => i !== index));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Construct validation_rules in the format expected by datasets.json
+    const mappedRules = {};
+    rules.forEach(r => {
+      if (!mappedRules[r.field]) mappedRules[r.field] = [];
+      mappedRules[r.field].push({
+        rule: r.type,
+        args: r.key ? { [r.key]: r.value } : {}
+      });
+    });
+
+    const payload = {
+      name: formData.name,
+      fqn: `ferrari.${formData.domain.toLowerCase() || 'general'}.${formData.name}`,
+      source_type: formData.source_type,
+      owner_unit_id: parseInt(formData.owner_unit_id),
+      operator_id: user?.id || 1, 
+      classification: formData.classification,
+      description: formData.description,
+      metadata: {
+        description: formData.description,
+        tags: {
+          domain: formData.domain,
+          upstreams: upstreams,
+          downstreams: downstreams
+        },
+        validation_rules: mappedRules,
+        version_id: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    };
+
+    try {
+      await axios.post("http://localhost:3000/datasets", payload);
+      alert("Dataset Registered Successfully!");
+      // Reset everything
+      setFormData({ name: '', owner_unit_id: '', department: '', source_type: '', classification: 'INTERNAL', domain: '', description: '', owner_contact: '' });
+      setRules([]); setUpstreams([]); setDownstreams([]);
+    } catch (error) {
+      alert("Error: Ensure 'npx json-server --watch datasets.json --port 3000' is running.");
+    }
   };
 
   return (
@@ -664,163 +1043,132 @@ const DataRegistrationPage = () => {
         <main className="flex-1 overflow-y-auto p-6 md:p-10">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
-              <div className="metric-icon blue">
-                <FiDatabase size={24} />
-              </div>
+              <div className="metric-icon blue"><FiDatabase size={24} /></div>
               <h1 className="text-3xl font-bold text-foreground">Register Dataset</h1>
             </div>
 
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-              <form className="p-8 space-y-8" onSubmit={(e) => e.preventDefault()}>
+              <form className="p-8 space-y-8" onSubmit={handleSubmit}>
                 
-                {/* 1. Basic Info: Owner, Dept, Source */}
+                {/* 1. Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">Owner <span className="text-destructive">*</span></label>
-                    <select className="search-input !pl-4 cursor-pointer"><option>-- Select Owner --</option></select>
+                    <label className="text-sm font-semibold text-foreground">Owner <Required /></label>
+                    <select name="owner_unit_id" value={formData.owner_unit_id} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+                      <option value="">-- Select Owner --</option>
+                      <option value="1">Admin</option>
+                      <option value="2">Data Sourcing</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">Department <span className="text-destructive">*</span></label>
-                    <select className="search-input !pl-4 cursor-pointer"><option>-- Select Department --</option></select>
+                    <label className="text-sm font-semibold text-foreground">Department <Required /></label>
+                    <select name="department" value={formData.department} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+                      <option value="">-- Select Department --</option>
+                      <option value="Sourcing">Sourcing</option>
+                      <option value="CRM">CRM</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">Data Source</label>
-                    <select className="search-input !pl-4 cursor-pointer"><option>-- Select Data Source --</option></select>
+                    <label className="text-sm font-semibold text-foreground">Data Source <Required /></label>
+                    <select name="source_type" value={formData.source_type} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+                      <option value="">-- Select Type --</option>
+                      <option value="CSV">CSV</option>
+                      <option value="JSON">JSON</option>
+                      <option value="XLS">XLS</option>
+                    </select>
                   </div>
                 </div>
 
                 {/* 2. Classification & Name */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">Classification</label>
-                    <select className="search-input !pl-4 cursor-pointer">
-                      <option>Public</option>
-                      <option>Internal</option>
-                      <option>Confidential</option>
-                      <option>Sensitive</option>
+                    <label className="text-sm font-semibold text-foreground">Classification <Required /></label>
+                    <select name="classification" value={formData.classification} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+                      <option value="PUBLIC">Public</option>
+                      <option value="INTERNAL">Internal</option>
+                      <option value="CONFIDENTIAL">Confidential</option>
+                      <option value="SENSITIVE">Sensitive</option>
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">Dataset Name <span className="text-destructive">*</span></label>
-                    <input type="text" placeholder="e.g., external_leads_feed" className="search-input !pl-4" />
+                    <label className="text-sm font-semibold text-foreground">Dataset Name <Required /></label>
+                    <input name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="e.g., external_leads_feed" className="search-input !pl-4" />
                   </div>
                 </div>
 
                 {/* 3. Domain & Description */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">Domain</label>
-                    <input type="text" placeholder="e.g., Sales" className="search-input !pl-4" />
+                    <label className="text-sm font-semibold text-foreground">Domain <Required /></label>
+                    <input name="domain" type="text" value={formData.domain} onChange={handleInputChange} placeholder="e.g., Sales" className="search-input !pl-4" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-foreground">Short Description</label>
-                    <input type="text" placeholder="Brief description of the dataset" className="search-input !pl-4" />
+                    <input name="description" type="text" value={formData.description} onChange={handleInputChange} placeholder="Brief description" className="search-input !pl-4" />
                   </div>
                 </div>
 
                 {/* 4. Owner Contact */}
                 <div className="max-w-md space-y-2">
                   <label className="text-sm font-semibold text-foreground">Owner Contact</label>
-                  <input type="text" placeholder="owner email or slack" className="search-input !pl-4" />
+                  <input name="owner_contact" type="text" value={formData.owner_contact} onChange={handleInputChange} placeholder="owner email or slack" className="search-input !pl-4" />
                 </div>
 
                 <hr className="border-border" />
 
-                {/* 5. Upstream & Downstream Source */}
+                {/* 5. Upstream & Downstream */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  
-                  {/* Upstream Section */}
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Upstream Source</h3>
-                    </div>
-                    {/* Tags */}
+                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Upstream Source <Required /></h3>
                     <div className="flex flex-wrap gap-2 min-h-[30px]">
                       {upstreams.length === 0 && <span className="text-xs text-muted-foreground italic">No sources added.</span>}
                       {upstreams.map((s, i) => (
                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-200">
-                          {s} <FiX className="cursor-pointer hover:text-indigo-900" onClick={() => setUpstreams(upstreams.filter((_, idx) => idx !== i))} />
+                          {s} <FiX className="cursor-pointer" onClick={() => setUpstreams(upstreams.filter((_, idx) => idx !== i))} />
                         </span>
                       ))}
                     </div>
-                    {/* Input */}
                     <div className="flex gap-2">
-                      <input 
-                        className="search-input !pl-4 flex-1" 
-                        placeholder="Add source..." 
-                        value={tempUpstream}
-                        onChange={(e) => setTempUpstream(e.target.value)}
-                      />
-                      <button 
-                        type="button" 
-                        onClick={addUpstream} 
-                        className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer transition-colors"
-                      >
-                        Add
-                      </button>
+                      <input className="search-input !pl-4 flex-1" placeholder="Add source..." value={tempUpstream} onChange={(e) => setTempUpstream(e.target.value)} />
+                      <button type="button" onClick={addUpstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 transition-colors cursor-pointer">Add</button>
                     </div>
                   </div>
 
-                  {/* Downstream Section */}
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Downstream Source</h3>
-                    </div>
-                    {/* Tags */}
+                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Downstream Source <Required /></h3>
                     <div className="flex flex-wrap gap-2 min-h-[30px]">
                       {downstreams.length === 0 && <span className="text-xs text-muted-foreground italic">No sources added.</span>}
                       {downstreams.map((s, i) => (
                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-bold border border-purple-200">
-                          {s} <FiX className="cursor-pointer hover:text-purple-900" onClick={() => setDownstreams(downstreams.filter((_, idx) => idx !== i))} />
+                          {s} <FiX className="cursor-pointer" onClick={() => setDownstreams(downstreams.filter((_, idx) => idx !== i))} />
                         </span>
                       ))}
                     </div>
-                    {/* Input */}
                     <div className="flex gap-2">
-                      <input 
-                        className="search-input !pl-4 flex-1" 
-                        placeholder="Add source..." 
-                        value={tempDownstream}
-                        onChange={(e) => setTempDownstream(e.target.value)}
-                      />
-                      <button 
-                        type="button" 
-                        onClick={addDownstream} 
-                        className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer transition-colors"
-                      >
-                        Add
-                      </button>
+                      <input className="search-input !pl-4 flex-1" placeholder="Add source..." value={tempDownstream} onChange={(e) => setTempDownstream(e.target.value)} />
+                      <button type="button" onClick={addDownstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 transition-colors cursor-pointer">Add</button>
                     </div>
                   </div>
                 </div>
 
                 {/* 6. Validation Rules Section */}
                 <div className="space-y-4 border-t border-border pt-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Validation Rules</h3>
-                  </div>
-                  
-                  {/* Inputs */}
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Validation Rules <Required /></h3>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <input className="search-input !pl-4" placeholder="Field name" value={currentRule.field} onChange={(e) => setCurrentRule({...currentRule, field: e.target.value})} />
                     <select className="search-input !pl-4 cursor-pointer" value={currentRule.type} onChange={(e) => setCurrentRule({...currentRule, type: e.target.value})}>
-                      <option>UNIQUE_CONSTRAINT</option>
-                      <option>NOT_NULL</option>
-                      <option>TYPE_CHECK</option>
+                      <option value="UNIQUE">UNIQUE</option>
+                      <option value="NOT_NULL">NOT_NULL</option>
+                      <option value="REGEX">REGEX</option>
                     </select>
                     <input className="search-input !pl-4" placeholder="arg key" value={currentRule.key} onChange={(e) => setCurrentRule({...currentRule, key: e.target.value})} />
                     <input className="search-input !pl-4" placeholder="arg value" value={currentRule.value} onChange={(e) => setCurrentRule({...currentRule, value: e.target.value})} />
                   </div>
-                  
-                  <button 
-                    type="button" 
-                    onClick={handleAddRule}
-                    className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer hover:bg-indigo-600 transition-all"
-                  >
+                  <button type="button" onClick={handleAddRule} className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer hover:bg-indigo-600">
                     <FiPlus size={18} /> Add Rule
                   </button>
 
-                  {/* NEW TABLE VIEW */}
+                  {/* Rule Table restored */}
                   {rules.length > 0 && (
                     <div className="border border-border rounded-lg overflow-hidden mt-2">
                       <table className="w-full text-sm text-left">
@@ -837,17 +1185,9 @@ const DataRegistrationPage = () => {
                             <tr key={index} className="hover:bg-muted/20 transition-colors">
                               <td className="px-4 py-2.5 font-medium text-foreground">{rule.field}</td>
                               <td className="px-4 py-2.5 text-muted-foreground">{rule.type}</td>
-                              <td className="px-4 py-2.5 text-muted-foreground text-xs font-mono">
-                                {rule.key ? `${rule.key}: ${rule.value}` : <span className="text-muted-foreground/50">None</span>}
-                              </td>
+                              <td className="px-4 py-2.5 text-muted-foreground text-xs font-mono">{rule.key ? `${rule.key}: ${rule.value}` : 'None'}</td>
                               <td className="px-4 py-2.5 text-right">
-                                <button 
-                                  onClick={() => removeRule(index)} 
-                                  className="text-destructive hover:bg-red-50 p-1.5 rounded-md transition-colors cursor-pointer"
-                                  title="Remove Rule"
-                                >
-                                  <FiTrash2 size={16} />
-                                </button>
+                                <button type="button" onClick={() => removeRule(index)} className="text-destructive p-1.5 cursor-pointer"><FiTrash2 size={16} /></button>
                               </td>
                             </tr>
                           ))}
@@ -856,7 +1196,7 @@ const DataRegistrationPage = () => {
                     </div>
                   )}
                   
-                  {/* JSON Preview Box */}
+                  {/* JSON Preview Box restored */}
                   <div className="space-y-2 mt-4">
                     <p className="text-xs font-mono text-muted-foreground">JSON Preview</p>
                     <div className="bg-slate-950 p-4 rounded-md border border-slate-800">
@@ -873,20 +1213,15 @@ const DataRegistrationPage = () => {
                     <button type="submit" className="flex-1 sm:flex-none bg-[#00a65a] text-white px-8 py-3 rounded-md font-bold text-sm hover:brightness-105 transition-all cursor-pointer">
                       Register Dataset
                     </button>
-                    <button 
-                      type="reset" 
-                      onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}}
-                      className="flex-1 sm:flex-none bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer transition-all"
-                    >
+                    <button type="reset" onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}} className="flex-1 sm:flex-none bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer">
                       Reset
                     </button>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <FiInfo className="text-primary" size={18} />
-                    <span><strong>Tip:</strong> Add multiple upstream/downstream sources and validation rules as needed.</span>
+                    <span><strong>Tip:</strong> Ensure all fields with <Required /> are filled.</span>
                   </div>
                 </div>
-
               </form>
             </div>
           </div>
@@ -897,16 +1232,3 @@ const DataRegistrationPage = () => {
 };
 
 export default DataRegistrationPage;
-
-
-
-
-
-
-
-
-
-
-
-
-
