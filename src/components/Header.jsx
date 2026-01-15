@@ -27,6 +27,7 @@ function Header() {
           className="search-input pl-8 sm:pl-12 text-xs sm:text-sm"
         />
       </div>
+      
 
       {/* User Actions Section */}
       <div className="flex items-center gap-1 sm:gap-4 min-w-max">
