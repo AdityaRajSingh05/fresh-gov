@@ -340,9 +340,9 @@ const LoginPage = () => {
 
       <div className="w-full max-w-[440px] z-10">
         <div className="text-center mb-6 md:mb-10">
-          <img src={logo} alt="Datavista" className="h-16 md:h-20 mx-auto mb-6 object-contain" />
-          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Welcome</h1>
-          <p className="text-blue-800 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Datavista Catalog</p>
+          <img src={logo} alt="Datavista" className="h-24 mx-auto mb-6 object-contain" />
+          {/* <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Welcome</h1>
+          <p className="text-blue-800 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Datavista Catalog</p> */}
         </div>
 
         <div className="bg-white/95 backdrop-blur-sm border border-white rounded-[24px] md:rounded-[32px] shadow-2xl overflow-hidden">
