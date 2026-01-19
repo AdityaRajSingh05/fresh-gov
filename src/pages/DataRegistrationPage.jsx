@@ -927,7 +927,7 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import SidebarToggle from '../components/SidebarToggle';
 import { useAuth } from '../context/AuthContext';
-import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX } from 'react-icons/fi';
+import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX, FiShield } from 'react-icons/fi';
 
 const DataRegistrationPage = () => {
   const { user } = useAuth();
@@ -942,7 +942,12 @@ const DataRegistrationPage = () => {
     classification: 'INTERNAL',
     domain: '',
     description: '',
-    owner_contact: ''
+    owner_contact: '',
+    // Governance Fields
+    governance_rule: 'GDPR',
+    retention_months: '',
+    retention_days: '',
+    is_masked: false
   });
 
   const [upstreams, setUpstreams] = useState([]);
@@ -953,12 +958,15 @@ const DataRegistrationPage = () => {
   const [tempDownstream, setTempDownstream] = useState("");
   const [currentRule, setCurrentRule] = useState({ field: '', type: 'UNIQUE_CONSTRAINT', key: '', value: '' });
 
-  const Required = () => <span className="text-destructive ml-1">*</span>;
+  const Required = () => <span className="text-destructive ml-1 text-red-500">*</span>;
 
   // --- Handlers ---
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   const addUpstream = () => {
@@ -987,7 +995,6 @@ const DataRegistrationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Construct validation_rules in the format expected by datasets.json
     const mappedRules = {};
     rules.forEach(r => {
       if (!mappedRules[r.field]) mappedRules[r.field] = [];
@@ -1013,6 +1020,11 @@ const DataRegistrationPage = () => {
           downstreams: downstreams
         },
         validation_rules: mappedRules,
+        governance: {
+          policy: formData.governance_rule,
+          retention_period: `${formData.retention_months}m ${formData.retention_days}d`,
+          is_masked: formData.is_masked
+        },
         version_id: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -1020,13 +1032,19 @@ const DataRegistrationPage = () => {
     };
 
     try {
+      // Logic: Connects to your Mock Server on port 3000
       await axios.post("http://localhost:3000/datasets", payload);
       alert("Dataset Registered Successfully!");
-      // Reset everything
-      setFormData({ name: '', owner_unit_id: '', department: '', source_type: '', classification: 'INTERNAL', domain: '', description: '', owner_contact: '' });
+      
+      // Reset form on success
+      setFormData({ 
+        name: '', owner_unit_id: '', department: '', source_type: '', 
+        classification: 'INTERNAL', domain: '', description: '', owner_contact: '',
+        governance_rule: 'GDPR', retention_months: '', retention_days: '', is_masked: false
+      });
       setRules([]); setUpstreams([]); setDownstreams([]);
     } catch (error) {
-      alert("Error: Ensure 'npx json-server --watch datasets.json --port 3000' is running.");
+      alert("Error: Ensure your Mock Server is running on port 3000.");
     }
   };
 
@@ -1056,16 +1074,15 @@ const DataRegistrationPage = () => {
                     <label className="text-sm font-semibold text-foreground">Owner <Required /></label>
                     <select name="owner_unit_id" value={formData.owner_unit_id} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
                       <option value="">-- Select Owner --</option>
-                      <option value="1">Admin</option>
-                      <option value="2">Data Sourcing</option>
+                      <option value="1">Ferrari</option>
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-foreground">Department <Required /></label>
                     <select name="department" value={formData.department} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
                       <option value="">-- Select Department --</option>
-                      <option value="Sourcing">Sourcing</option>
-                      <option value="CRM">CRM</option>
+                      <option value="Sourcing">Data Sourcing</option>
+                      <option value="CRM">CRM Team</option>
                     </select>
                   </div>
                   <div className="space-y-2">
@@ -1075,6 +1092,7 @@ const DataRegistrationPage = () => {
                       <option value="CSV">CSV</option>
                       <option value="JSON">JSON</option>
                       <option value="XLS">XLS</option>
+                      <option value="Postgres">Postgres</option>
                     </select>
                   </div>
                 </div>
@@ -1121,7 +1139,6 @@ const DataRegistrationPage = () => {
                   <div className="space-y-4">
                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Upstream Source <Required /></h3>
                     <div className="flex flex-wrap gap-2 min-h-[30px]">
-                      {upstreams.length === 0 && <span className="text-xs text-muted-foreground italic">No sources added.</span>}
                       {upstreams.map((s, i) => (
                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-200">
                           {s} <FiX className="cursor-pointer" onClick={() => setUpstreams(upstreams.filter((_, idx) => idx !== i))} />
@@ -1130,14 +1147,13 @@ const DataRegistrationPage = () => {
                     </div>
                     <div className="flex gap-2">
                       <input className="search-input !pl-4 flex-1" placeholder="Add source..." value={tempUpstream} onChange={(e) => setTempUpstream(e.target.value)} />
-                      <button type="button" onClick={addUpstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 transition-colors cursor-pointer">Add</button>
+                      <button type="button" onClick={addUpstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer">Add</button>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Downstream Source <Required /></h3>
                     <div className="flex flex-wrap gap-2 min-h-[30px]">
-                      {downstreams.length === 0 && <span className="text-xs text-muted-foreground italic">No sources added.</span>}
                       {downstreams.map((s, i) => (
                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-bold border border-purple-200">
                           {s} <FiX className="cursor-pointer" onClick={() => setDownstreams(downstreams.filter((_, idx) => idx !== i))} />
@@ -1145,15 +1161,15 @@ const DataRegistrationPage = () => {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <input className="search-input !pl-4 flex-1" placeholder="Add source..." value={tempDownstream} onChange={(e) => setTempDownstream(e.target.value)} />
-                      <button type="button" onClick={addDownstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 transition-colors cursor-pointer">Add</button>
+                      <input className="search-input !pl-4 flex-1" placeholder="Add target..." value={tempDownstream} onChange={(e) => setTempDownstream(e.target.value)} />
+                      <button type="button" onClick={addDownstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer">Add</button>
                     </div>
                   </div>
                 </div>
 
                 {/* 6. Validation Rules Section */}
                 <div className="space-y-4 border-t border-border pt-6">
-                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Validation Rules <Required /></h3>
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Validation Rules</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <input className="search-input !pl-4" placeholder="Field name" value={currentRule.field} onChange={(e) => setCurrentRule({...currentRule, field: e.target.value})} />
                     <select className="search-input !pl-4 cursor-pointer" value={currentRule.type} onChange={(e) => setCurrentRule({...currentRule, type: e.target.value})}>
@@ -1164,11 +1180,10 @@ const DataRegistrationPage = () => {
                     <input className="search-input !pl-4" placeholder="arg key" value={currentRule.key} onChange={(e) => setCurrentRule({...currentRule, key: e.target.value})} />
                     <input className="search-input !pl-4" placeholder="arg value" value={currentRule.value} onChange={(e) => setCurrentRule({...currentRule, value: e.target.value})} />
                   </div>
-                  <button type="button" onClick={handleAddRule} className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer hover:bg-indigo-600">
+                  <button type="button" onClick={handleAddRule} className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer">
                     <FiPlus size={18} /> Add Rule
                   </button>
 
-                  {/* Rule Table restored */}
                   {rules.length > 0 && (
                     <div className="border border-border rounded-lg overflow-hidden mt-2">
                       <table className="w-full text-sm text-left">
@@ -1182,12 +1197,12 @@ const DataRegistrationPage = () => {
                         </thead>
                         <tbody className="divide-y divide-border">
                           {rules.map((rule, index) => (
-                            <tr key={index} className="hover:bg-muted/20 transition-colors">
-                              <td className="px-4 py-2.5 font-medium text-foreground">{rule.field}</td>
-                              <td className="px-4 py-2.5 text-muted-foreground">{rule.type}</td>
-                              <td className="px-4 py-2.5 text-muted-foreground text-xs font-mono">{rule.key ? `${rule.key}: ${rule.value}` : 'None'}</td>
+                            <tr key={index} className="hover:bg-muted/20">
+                              <td className="px-4 py-2.5 font-medium">{rule.field}</td>
+                              <td className="px-4 py-2.5">{rule.type}</td>
+                              <td className="px-4 py-2.5 font-mono text-xs">{rule.key}: {rule.value}</td>
                               <td className="px-4 py-2.5 text-right">
-                                <button type="button" onClick={() => removeRule(index)} className="text-destructive p-1.5 cursor-pointer"><FiTrash2 size={16} /></button>
+                                <button type="button" onClick={() => removeRule(index)} className="text-destructive p-1.5"><FiTrash2 size={16} /></button>
                               </td>
                             </tr>
                           ))}
@@ -1195,14 +1210,32 @@ const DataRegistrationPage = () => {
                       </table>
                     </div>
                   )}
-                  
-                  {/* JSON Preview Box restored */}
-                  <div className="space-y-2 mt-4">
-                    <p className="text-xs font-mono text-muted-foreground">JSON Preview</p>
-                    <div className="bg-slate-950 p-4 rounded-md border border-slate-800">
-                      <pre className="text-slate-200 font-mono text-sm overflow-x-auto">
-                        {JSON.stringify(rules.length > 0 ? rules : {}, null, 2)}
-                      </pre>
+                </div>
+
+                {/* 7. Governance Policies */}
+                <div className="space-y-6 border-t border-border pt-6">
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Governance Policies</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Governance Rule <Required /></label>
+                      <select name="governance_rule" value={formData.governance_rule} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+                        <option value="GDPR">GDPR</option>
+                        <option value="ISO">ISO 27001</option>
+                        <option value="NONE">None / Internal</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Retention Period <Required /></label>
+                      <div className="flex gap-2">
+                        <input name="retention_months" type="number" value={formData.retention_months} onChange={handleInputChange} placeholder="Months" className="search-input !pl-4" />
+                        <input name="retention_days" type="number" value={formData.retention_days} onChange={handleInputChange} placeholder="Days" className="search-input !pl-4" />
+                      </div>
+                    </div>
+                    <div className="flex items-end pb-2">
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <input name="is_masked" type="checkbox" checked={formData.is_masked} onChange={handleInputChange} className="w-5 h-5 cursor-pointer" />
+                        <span className="text-sm font-semibold text-foreground">Dataset is Masked</span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -1210,16 +1243,16 @@ const DataRegistrationPage = () => {
                 {/* Footer Buttons */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-6 border-t border-border">
                   <div className="flex gap-4 w-full sm:w-auto">
-                    <button type="submit" className="flex-1 sm:flex-none bg-[#00a65a] text-white px-8 py-3 rounded-md font-bold text-sm hover:brightness-105 transition-all cursor-pointer">
+                    <button type="submit" className="bg-[#00a65a] text-white px-8 py-3 rounded-md font-bold text-sm hover:brightness-105 cursor-pointer">
                       Register Dataset
                     </button>
-                    <button type="reset" onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}} className="flex-1 sm:flex-none bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer">
+                    <button type="reset" onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}} className="bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer">
                       Reset
                     </button>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <FiInfo className="text-primary" size={18} />
-                    <span><strong>Tip:</strong> Ensure all fields with <Required /> are filled.</span>
+                    <span><strong>Tip:</strong> Ensure all fields with * are filled.</span>
                   </div>
                 </div>
               </form>
