@@ -345,50 +345,37 @@
 
 // NEW CODE 1:- RESPONSIVE
 import React, { useState } from 'react';
-import { FiGrid, FiDatabase, FiCheckCircle, FiGitBranch, FiShield, FiChevronLeft, FiChevronRight, FiX, FiFileText, FiAlertCircle } from 'react-icons/fi';
+import { FiGrid, FiDatabase, FiCheckCircle, FiGitBranch, FiShield, FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
 
-// Data Steward Navigation Items
-const dataStewardNavItems = [
+const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: <FiGrid size={22} />, path: '/dashboard' },
   { id: 'register', label: 'Register Dataset', icon: <FiDatabase size={22} />, path: '/register' },
+  // { id: 'governance', label: 'Governance', icon: <FiShield size={22} />, path: '/governance' },
   { id: 'lineage', label: 'Data Lineage', icon: <FiGitBranch size={22} />, path: '/lineage' },
   { id: 'quality', label: 'Data Quality', icon: <FiCheckCircle size={22} />, path: '/quality' },
-];
-
-// Compliance Officer Navigation Items
-const complianceOfficerNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: <FiGrid size={22} />, path: '/compliance-dashboard' },
-  { id: 'governance', label: 'Governance & Policy', icon: <FiShield size={22} />, path: '/governance' },
-  { id: 'audit', label: 'Audit Logs', icon: <FiFileText size={22} />, path: '/audit-logs' },
-  { id: 'violations', label: 'Violations', icon: <FiAlertCircle size={22} />, path: '/violations' },
 ];
 
 function Sidebar({ isOpen, onClose }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  // Determine navigation items based on user role
-  const navItems = user?.role === 'compliance_officer' ? complianceOfficerNavItems : dataStewardNavItems;
 
   return (
     <>
       {/* Mobile Backdrop */}
-      <div
-        className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={onClose}
+      <div 
+        className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        onClick={onClose} 
       />
-
+      
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 bg-[#0f172a] transition-all duration-300 
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${isCollapsed ? 'lg:w-24' : 'lg:w-72'} w-72 flex flex-col shadow-2xl`}>
-
+        
         {/* Desktop Collapse Arrow */}
-        <button
+        <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="hidden lg:flex absolute -right-3 top-12 w-7 h-7 bg-blue-600 rounded-full items-center justify-center text-white shadow-xl z-50 border-2 border-white hover:bg-blue-700 transition-all cursor-pointer"
         >
@@ -404,10 +391,10 @@ function Sidebar({ isOpen, onClose }) {
             </div>
           ) : (
             /* Full Logo for Expanded Mode - Increased size */
-            <img
-              src={logo}
-              alt="DataVista"
-              className="h-14 w-auto object-contain transition-all duration-300"
+            <img 
+              src={logo} 
+              alt="DataVista" 
+              className="h-14 w-auto object-contain transition-all duration-300" 
             />
           )}
         </div>
@@ -415,16 +402,16 @@ function Sidebar({ isOpen, onClose }) {
         {/* Navigation Items */}
         <nav className="flex-1 px-4 space-y-3 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => { navigate(item.path); if (window.innerWidth < 1024) onClose(); }}
+            <button 
+              key={item.id} 
+              onClick={() => { navigate(item.path); if(window.innerWidth < 1024) onClose(); }}
               className={`flex items-center gap-4 w-full p-4 rounded-xl transition-all relative group cursor-pointer
                 ${location.pathname === item.path ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}
                 ${isCollapsed ? 'justify-center' : 'justify-start'}`}
             >
               <span className="shrink-0">{item.icon}</span>
               {!isCollapsed && <span className="font-bold text-[15px] tracking-wide whitespace-nowrap">{item.label}</span>}
-
+              
               {/* Tooltip for collapsed mode */}
               {isCollapsed && (
                 <div className="absolute left-full ml-4 px-3 py-2 bg-slate-800 text-white text-[10px] rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100] font-bold uppercase tracking-tighter">
