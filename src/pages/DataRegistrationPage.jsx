@@ -928,6 +928,8 @@ import Header from '../components/Header';
 import SidebarToggle from '../components/SidebarToggle';
 import { useAuth } from '../context/AuthContext';
 import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX, FiShield } from 'react-icons/fi';
+// Import Toast
+import toast, { Toaster } from 'react-hot-toast';
 
 const DataRegistrationPage = () => {
   const { user } = useAuth();
@@ -943,7 +945,6 @@ const DataRegistrationPage = () => {
     domain: '',
     description: '',
     owner_contact: '',
-    // Governance Fields
     governance_rule: 'GDPR',
     retention_months: '',
     retention_days: '',
@@ -995,6 +996,17 @@ const DataRegistrationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Professional Loading Toast
+    const loadingToast = toast.loading('Registering dataset...', {
+      style: {
+        borderRadius: '10px',
+        background: '#fff',
+        color: '#333',
+        border: '1px solid #e2e8f0',
+        fontWeight: '600'
+      },
+    });
+
     const mappedRules = {};
     rules.forEach(r => {
       if (!mappedRules[r.field]) mappedRules[r.field] = [];
@@ -1032,11 +1044,20 @@ const DataRegistrationPage = () => {
     };
 
     try {
-      // Logic: Connects to your Mock Server on port 3000
       await axios.post("http://localhost:3000/datasets", payload);
-      alert("Dataset Registered Successfully!");
       
-      // Reset form on success
+      // Professional Success Toast
+      toast.success('Dataset Registered Successfully!', { 
+        id: loadingToast,
+        style: {
+          borderRadius: '10px',
+          background: '#fff',
+          color: '#10b981', // Green text
+          border: '1px solid #10b981',
+          fontWeight: '700'
+        }
+      });
+      
       setFormData({ 
         name: '', owner_unit_id: '', department: '', source_type: '', 
         classification: 'INTERNAL', domain: '', description: '', owner_contact: '',
@@ -1044,12 +1065,30 @@ const DataRegistrationPage = () => {
       });
       setRules([]); setUpstreams([]); setDownstreams([]);
     } catch (error) {
-      alert("Error: Ensure your Mock Server is running on port 3000.");
+      // Professional Error Toast
+      toast.error('Registration failed. Server error.', { 
+        id: loadingToast,
+        style: {
+          borderRadius: '10px',
+          background: '#fff',
+          color: '#ef4444', // Red text
+          border: '1px solid #ef4444',
+          fontWeight: '700'
+        }
+      });
     }
   };
 
   return (
     <div className="flex min-h-screen bg-background font-inter">
+      {/* Toast Container - Force top-right and professional padding */}
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+            duration: 4000,
+        }}
+      />
+
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -1246,7 +1285,7 @@ const DataRegistrationPage = () => {
                     <button type="submit" className="bg-[#00a65a] text-white px-8 py-3 rounded-md font-bold text-sm hover:brightness-105 cursor-pointer">
                       Register Dataset
                     </button>
-                    <button type="reset" onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}} className="bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer">
+                    <button type="button" onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}} className="bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer">
                       Reset
                     </button>
                   </div>
