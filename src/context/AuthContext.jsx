@@ -135,7 +135,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       // UPDATED TO PORT 3000 based on your terminal image
-      const response = await axios.get("http://localhost:3000/users");
+      const response = await axios.get("http://localhost:3000/api/v1/users");
       const users = response.data;
 
       const foundUser = users.find(

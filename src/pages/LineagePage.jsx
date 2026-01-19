@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ReactFlow, {
     Background,
     BackgroundVariant,
@@ -9,85 +9,107 @@ import ReactFlow, {
     Handle,
     Position,
     addEdge,
+    MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { getLineage, getDataset } from '../api/Lineage';
 import Sidebar from '../components/Sidebar';
 import SidebarToggle from '../components/SidebarToggle';
 import Header from '../components/Header';
 
 // --- Custom Node Component ---
+// UPDATED: Removed dataset name entirely. Now shows Dept and Format.
 const CustomNode = ({ data }) => (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-slate-200 min-w-[150px]">
+    <div
+        className={`px-4 py-3 shadow-md rounded-lg border-2 min-w-[160px] text-center ${data.isMain ? 'bg-blue-50 border-blue-500' : 'bg-white border-slate-200'}`}
+        title={`Dataset: ${data.label}`} // Full name remains available on hover only
+    >
         <Handle type="target" position={Position.Left} className="w-2 h-2 !bg-blue-500" />
-        <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{data.type}</span>
-            <span className="text-sm font-semibold text-slate-700">{data.label}</span>
+
+        <div className="flex flex-col items-center gap-2">
+            {/* Owner Unit - The Primary Identifier */}
+            <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-widest bg-slate-800 text-white w-full">
+                {data.label || 'Unknown Dept'}
+            </span>
+
+            {/* Data Format / Source Type */}
+            <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-tighter">
+                    {data.type || 'DATA'}
+                </span>
+            </div>
         </div>
+
         <Handle type="source" position={Position.Right} className="w-2 h-2 !bg-blue-500" />
     </div>
 );
 
-// Memoized nodeTypes to avoid React Flow warning
 const nodeTypes = { custom: CustomNode };
 
-// --- Mock Data ---
-const datasetLineage = {
-    external_leads_feed: {
-        nodes: [
-            { id: '1', type: 'custom', data: { label: 'S3 Bucket (Source)', type: 'Source' }, position: { x: 0, y: 100 } },
-            { id: '2', type: 'custom', data: { label: 'external_leads_feed', type: 'Dataset' }, position: { x: 300, y: 100 } },
-            { id: '3', type: 'custom', data: { label: 'Sales Warehouse', type: 'Target' }, position: { x: 600, y: 100 } },
-        ],
-        edges: [
-            { id: 'e1-2', source: '1', target: '2', animated: true },
-            { id: 'e2-3', source: '2', target: '3' },
-        ],
-    },
-    central_customer_300: {
-        nodes: [
-            { id: '1', type: 'custom', data: { label: 'CRM System', type: 'Source' }, position: { x: 0, y: 50 } },
-            { id: '2', type: 'custom', data: { label: 'ERP System', type: 'Target' }, position: { x: 600, y: 150 } },
-            { id: '3', type: 'custom', data: { label: 'central_customer_360', type: 'Dataset' }, position: { x: 300, y: 100 } },
-            { id: '4', type: 'custom', data: { label: 'Finance Dashboard', type: 'Target' }, position: { x: 600, y: 0 } },
-        ],
-        edges: [
-            { id: 'e1-3', source: '1', target: '3', animated: true },
-            { id: 'e3-2', source: '3', target: '2', animated: true },
-            { id: 'e3-4', source: '3', target: '4', animated: true },
-        ],
-    },
-};
-
 export default function LineagePage() {
+    const [datasetId, setDatasetId] = useState('');
+    const [datasets, setDatasets] = useState([]);
     const [nodes, setNodes] = useState([]);
     const [edges, setEdges] = useState([]);
-    const [selectedDataset, setSelectedDataset] = useState('');
-
-    const onNodesChange = useCallback((changes) => {
-        setNodes((nds) => applyNodeChanges(changes, nds));
-    }, []);
-
-    const onEdgesChange = useCallback((changes) => {
-        setEdges((eds) => applyEdgeChanges(changes, eds));
-    }, []);
-
-    const onConnect = useCallback((params) => {
-        setEdges((eds) => addEdge(params, eds));
-    }, []);
-
-    const handleDatasetChange = (e) => {
-        const val = e.target.value;
-        setSelectedDataset(val);
-        if (datasetLineage[val]) {
-            setNodes(datasetLineage[val].nodes);
-            setEdges(datasetLineage[val].edges);
-        } else {
-            setNodes([]);
-            setEdges([]);
-        }
-    };
-
     const [sidebarOpen, setSidebarOpen] = useState(true);
+
+    useEffect(() => {
+        getDataset().then(data => {
+            setDatasets(data);
+        });
+    }, []);
+
+    // Fetch Data
+    useEffect(() => {
+
+        if (!datasetId) return;
+
+        getLineage(datasetId).then(data => {
+            // Process nodes
+            const fetchedNodes = data.nodes.map((node) => ({
+                id: `node-${node.id}`,
+                type: 'custom',
+                data: {
+                    label: node.data.label,
+                    type: node.data.type
+                },
+                position: node.position,
+            }));
+
+            const fetchedEdges = data.edges.map((edge, index) => ({
+                id: `edge-${index}`,
+                source: `node-${edge.source}`,
+                target: `node-${edge.target}`,
+                markerEnd: {
+                    type: MarkerType.Arrow,
+                },
+                animated: true,
+                style: { stroke: '#3b82f6' },
+            }));
+
+            setNodes(fetchedNodes);
+            setEdges(fetchedEdges);
+        });
+    }, [datasetId]);
+
+    // --- Helper to find Owner Name ---
+    // const getOwnerName = useCallback((ownerId) => {
+    //     if (!orgUnits.length) return 'Loading...';
+    //     const unit = orgUnits.find(u => u.id === ownerId);
+    //     return unit ? unit.name : 'Unassigned';
+    // }, [orgUnits]);
+
+    // Build Graph
+
+    // Handlers
+    const onNodesChange = useCallback((changes) => setNodes((nds) => applyNodeChanges(changes, nds)), []);
+    const onEdgesChange = useCallback((changes) => setEdges((eds) => applyEdgeChanges(changes, eds)), []);
+    const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+    const handleDatasetChange = (e) => {
+        const selectedId = e.target.value;
+        setDatasetId(selectedId);
+    }
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
     const closeSidebar = () => setSidebarOpen(false);
 
@@ -95,39 +117,29 @@ export default function LineagePage() {
         <div className="flex min-h-screen w-screen bg-[#f8fafc]">
             <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-            <main className="flex flex-col flex-1">
-                {/* Title and Selector */}
-
+            <main className="flex flex-col flex-1 h-screen overflow-hidden">
                 <header className="header-with-toggle">
                     <SidebarToggle isOpen={sidebarOpen} onToggle={toggleSidebar} />
                     <Header className="bg-red-500" />
                 </header>
 
-                <div className="p-8">
+                <div className="p-8 pb-0">
                     <h1 className="text-2xl font-bold text-[#1e293b]">Data Lineage Explorer</h1>
-                    <p className="text-slate-500 text-sm">Visualize the end-to-end journey of your data assets.</p>
-
-                    <div className="mt-6 max-w-sm">
-                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
-                            Select Dataset
-                        </label>
+                    <div className="mt-6 max-w-sm mb-4">
                         <select
-                            value={selectedDataset}
+                            value={datasetId}
                             onChange={handleDatasetChange}
-                            className="w-full p-3 bg-white border border-slate-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 transition-all cursor-pointer"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 text-slate-700"
                         >
-                            <option value="">-- Choose a dataset --</option>
-                            <option value="external_leads_feed">external_leads_feed</option>
-                            <option value="central_customer_300">central_customer_300</option>
+                            <option value="">-- Select Dataset --</option>
+                            {datasets.map(ds => (
+                                <option key={ds.id} value={ds.id}>{ds.name}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
-
-                {/* Lineage Canvas */}
-                {/* Fix overflow issue by adding relative position */}
-
-                <div className="flex-1 bg-white border border-slate-100 shadow-md relative">
-                    {selectedDataset ? (
+                <div className="flex-1 bg-white border-t border-slate-200 relative w-full h-full">
+                    {datasetId && nodes.length > 0 && (
                         <ReactFlow
                             nodes={nodes}
                             edges={edges}
@@ -137,35 +149,14 @@ export default function LineagePage() {
                             nodeTypes={nodeTypes}
                             fitView
                         >
-                            <Background
-                                bgColor="#f8fafc"
-                                id="1"
-                                gap={10}
-                                color="#f1f1f1"
-                                variant={BackgroundVariant.Dots}
-                                size={4}
-                            />
-
-                            <Background
-                                id="2"
-                                gap={100}
-                                color="#ccc"
-                                variant={BackgroundVariant.Lines}
-                            />
+                            <Background bgColor="#f8fafc" gap={16} size={1} />
                             <Controls />
-                            <MiniMap nodeStrokeWidth={3} zoomable pannable />
+                            <MiniMap nodeColor={n => n.data.isMain ? '#3b82f6' : '#e2e8f0'} />
                         </ReactFlow>
-                    ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                            <svg className="w-16 h-16 mb-4 opacity-20" fill="none" stroke="#000" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"
-                                />
-                            </svg>
-                            <p className="font-medium">Select a dataset to visualize its lineage</p>
+                    )}
+                    {datasetId && nodes.length === 0 && (
+                        <div className="flex items-center justify-center h-full text-slate-500">
+                            <p>Loading lineage data...</p>
                         </div>
                     )}
                 </div>
@@ -173,4 +164,3 @@ export default function LineagePage() {
         </div>
     );
 }
- 

@@ -383,7 +383,7 @@ function Sidebar({ isOpen, onClose }) {
         </button>
 
         {/* Logo Section - Fixed sizing and switching logic */}
-        <div className={`pt-10 pb-12 flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'px-8'}`}>
+        <div className={`pt-5 pb-6 flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'px-8'}`}>
           {isCollapsed ? (
             /* DV Icon for Collapsed Mode */
             <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-900/40">
@@ -393,8 +393,8 @@ function Sidebar({ isOpen, onClose }) {
             /* Full Logo for Expanded Mode - Increased size */
             <img 
               src={logo} 
-              alt="DataVista" 
-              className="h-14 w-auto object-contain transition-all duration-300" 
+              alt="DataVista"
+              className="h-20 w-auto object-contain transition-all duration-300" 
             />
           )}
         </div>

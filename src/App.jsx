@@ -131,7 +131,7 @@
 //         <Routes>
 //           {/* Landing page */}
 //           <Route path="/" element={<LoginPage />} />
-          
+
 //           {/* Dashboard routes */}
 //           <Route path="/dashboard" element={<DataStewardDashboard />} />
 //           <Route path="/register" element={<DataRegistrationPage />} />
@@ -215,7 +215,7 @@ import NotFoundPage from './pages/NotFoundPage';
  */
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   // While checking the authentication status (localStorage/Axios), show a loader
   if (loading) {
     return (
@@ -244,36 +244,36 @@ function App() {
         <Routes>
           {/* Public Route: Login Page */}
           <Route path="/" element={<LoginPage />} />
-          
+
           {/* Protected Routes: 
               These will only open if a user from your users.json 
               successfully logs in via the AuthContext.
           */}
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <DataStewardDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/register" 
+
+          <Route
+            path="/register"
             element={
               <ProtectedRoute>
                 <DataRegistrationPage />
               </ProtectedRoute>
-            } 
+            }
           />
 
-          <Route path="/lineage" 
+          <Route path="/lineage"
             element={
-            <ProtectedRoute>
-            <LineagePage />
-            </ProtectedRoute>
-          }
-           />
+              <ProtectedRoute>
+                <LineagePage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 404 & Fallback Redirects */}
           <Route path="/404" element={<NotFoundPage />} />
