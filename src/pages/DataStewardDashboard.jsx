@@ -15,7 +15,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchDatasets = async () => {
             try {
-                const response = await axios.get("http://localhost:3000/datasets");
+                const response = await axios.get("http://localhost:3000/api/v1/datasets");
                 setDatasets(response.data);
             } catch (error) {
                 console.error("Error fetching datasets:", error);
@@ -115,9 +115,9 @@ const Dashboard = () => {
                                                 <td className="px-8 py-6">
                                                     {/* Classification: Pure simple text colors matching your Quality page style */}
                                                     <span className={`font-bold uppercase text-xs tracking-wider ${
-                                                        ds.classification === 'Sensitive' ? 'text-[#ef4444]' : 
-                                                        ds.classification === 'Confidential' ? 'text-[#f59e0b]' : 
-                                                        ds.classification === 'Internal' ? 'text-[#22c55e]' : 'text-slate-600'
+                                                        ds.classification === 'SENSITIVE' ? 'text-red-500' : 
+                                                        ds.classification === 'CONFIDENTIAL' ? 'text-yellow-500' : 
+                                                        ds.classification === 'INTERNAL' ? 'text-green-500' : 'text-slate-500'
                                                     }`}>
                                                         {ds.classification}
                                                     </span>
