@@ -213,6 +213,7 @@ import AuditLogs from './pages/Compliance/AuditLogs';
 import Violations from './pages/Compliance/Violations';
 import GovernancePolicy from './pages/GovernancePolicy';
 import DataQualityDashboard from './pages/DataQualityDashboard';
+import QualityBatchList from './pages/QualityBatchList';
 
 
 /**
@@ -319,14 +320,27 @@ function App() {
             }
           />
 
-          <Route
-            path="/quality"
+            {/* Data Quality Batch List */}
+        <Route 
+          path="/quality" 
+          element={
+            <ProtectedRoute>
+            <QualityBatchList />
+            </ProtectedRoute>
+          }
+          />
+
+          {/* Data Quality Dashboard */}  
+           <Route
+            path="/quality/:id"
             element={
               <ProtectedRoute>
                 <DataQualityDashboard />
               </ProtectedRoute>
             }
           />
+
+
 
           {/* 404 & Fallback Redirects */}
           <Route path="/404" element={<NotFoundPage />} />
