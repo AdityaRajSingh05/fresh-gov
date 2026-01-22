@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import SidebarToggle from '../components/SidebarToggle';
@@ -7,31 +8,33 @@ import * as XLSX from 'xlsx';
 import { FiRefreshCw, FiDownload, FiAlertCircle, FiActivity, FiCheckCircle, FiLoader } from 'react-icons/fi';
 
 const DataQualityDashboard = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    // 1. New states for data management
-    const [rules, setRules] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [jobData, setJobData] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [loading, setLoading] = useState(true);
+    const [isScanning, setIsScanning] = useState(false); 
 
-    // 2. Function to fetch data
-    const fetchQualityRules = async () => {
-        setLoading(true);
-        setError(null);
+    const fetchData = async (manual = false) => {
+        if (manual) setIsScanning(true);
+        else setLoading(true);
+
         try {
-            const response = await axios.get('http://localhost:3000/api/v1/quality');
-            setRules(response.data); // Store the actual array in state
-        } catch (err) {
-            console.error('Error fetching quality rules:', err);
-            setError('Failed to load quality data.');
+            if (manual) await new Promise(r => setTimeout(r, 1200));
+            
+            const response = await fetch(`http://localhost:3000/api/v1/quality_batch_job/${id}`);
+            const result = await response.json();
+            setJobData(result);
+        } catch (error) {
+            console.error("Error:", error);
         } finally {
             setLoading(false);
+            setIsScanning(false);
         }
     };
 
-    // 3. Fetch data on component mount
-    useEffect(() => {
-        fetchQualityRules();
-    }, []);
+    useEffect(() => { fetchData(); }, [id]);
 
     // 4. Function to download Excel file
     const downloadExcel = () => {
@@ -75,19 +78,67 @@ const DataQualityDashboard = () => {
         <div className="flex min-h-screen bg-[#f8fafc] font-inter">
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-            <div className="flex-1 flex flex-col min-w-0">
-                <header className="header-with-toggle">
-                    <SidebarToggle isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-                    <Header />
-                </header>
+        // 1. Define CSV Headers
+        const headers = ["ID", "Field Name", "Rule Type", "Score", "Status", "Diagnostic Detail"];
+        
+        // 2. Map the execution rules to CSV rows
+        const rows = jobData.execution_rules.map(rule => [
+            `"${rule.id}"`,
+            `"${rule.field}"`,
+            `"${rule.rule_type || ''}"`,
+            `"${rule.score}%"`,
+            `"${rule.status}"`,
+            `"${rule.diagnostic_detail || ''}"`
+        ]);
 
-                <main className="flex-1 p-8">
-                    <div className="max-w-7xl mx-auto">
+        // 3. Combine headers and rows
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.join(","))
+        ].join("\n");
+
+        // 4. Create a Blob and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `DataQuality_Report_${id}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const filteredRules = jobData?.execution_rules.filter(rule => {
+        const matchesStatus = statusFilter === 'ALL' || rule.status === statusFilter;
+        const matchesSearch = rule.field.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             rule.id.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesStatus && matchesSearch;
+    }) || [];
+
+    return (
+        <div className="flex min-h-screen bg-[#f8fafc] font-inter antialiased">
+            <Sidebar isOpen={true} />
+            <div className="flex-1 flex flex-col min-w-0">
+                <Header />
+                <main className="flex-1 p-6 lg:p-10">
+                    <div className="max-w-[1400px] mx-auto">
                         
-                        <div className="flex justify-between items-center mb-8">
+                        <button 
+                            onClick={() => navigate('/quality')} 
+                            className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-blue-600 mb-6 transition-colors"
+                        >
+                            <FiArrowLeft /> Back to Batch List
+                        </button>
+
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-10">
                             <div>
-                                <h1 className="text-2xl font-bold text-[#1e293b]">Data Quality Dashboard</h1>
-                                <p className="text-slate-500 text-sm mt-1">Batch ID: Customer_Data_Batch_#080126</p>
+                                <h1 className="text-3xl font-[800] text-slate-900 tracking-tight">
+                                    {jobData?.batch_name || 'Loading Batch...'}
+                                </h1>
+                                <p className="mt-2 text-sm font-medium text-slate-500 uppercase tracking-wide">
+                                    {jobData?.entity_type} Analysis Report
+                                </p>
                             </div>
                             <div className="flex gap-3">
                                 <button 
@@ -97,73 +148,56 @@ const DataQualityDashboard = () => {
                                 >
                                     <FiDownload /> Download Excel
                                 </button>
-                                {/* 4. Added onClick and loading state to button */}
+                                
+                                {/* UPDATED BUTTON */}
                                 <button 
-                                    onClick={fetchQualityRules}
-                                    disabled={loading}
-                                    className="flex items-center gap-2 bg-[#22c55e] text-white px-4 py-2 rounded-lg font-semibold shadow-sm hover:bg-green-600 transition-all cursor-pointer disabled:opacity-50"
+                                    onClick={handleDownloadCSV}
+                                    className="flex items-center gap-2 bg-white border border-slate-200 px-5 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
                                 >
-                                    {loading ? <FiLoader className="animate-spin" /> : <FiRefreshCw />}
-                                    {loading ? "Scanning..." : "Re-run Scan"}
+                                    <FiDownload /> DOWNLOAD CSV
                                 </button>
                             </div>
                         </div>
 
-                        {/* Metric Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-6">
-                                <div className="w-14 h-14 bg-[#fff1f2] text-[#f43f5e] rounded-xl flex items-center justify-center">
-                                    <FiAlertCircle className="w-7 h-7" />
-                                </div>
-                                <div>
-                                    <div className="text-4xl font-bold text-slate-800">45%</div>
-                                    <div className="text-slate-500 font-medium">Health Index</div>
-                                </div>
-                            </div>
-                            {/* ... other cards ... */}
+                        <div className="mb-10">
+                            {jobData && <QualityKpiGrid executionRules={jobData.execution_rules} />}
                         </div>
 
-                        {/* Execution Table */}
-                        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm">
-                            <div className="p-6 flex justify-between items-center">
-                                <h2 className="text-xl font-bold text-[#1e293b]">Execution Table</h2>
-                                {error && <span className="text-red-500 text-sm">{error}</span>}
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
-                                    <thead>
-                                        <tr className="text-slate-400 text-sm font-semibold border-t border-b border-slate-50">
-                                            <th className="px-8 py-5">Rule ID</th>
-                                            <th className="px-8 py-5">Field Name</th>
-                                            <th className="px-8 py-5">Score</th>
-                                            <th className="px-8 py-5">Status</th>
-                                            <th className="px-8 py-5">Diagnostic Detail</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="text-slate-700">
-                                        {/* 5. Map over the 'rules' state array */}
-                                        {!loading && rules.map((rule, idx) => (
-                                            <tr key={rule.id || idx} className="border-b border-slate-50 last:border-0">
-                                                <td className="px-8 py-6 text-slate-500">{rule.id}</td>
-                                                <td className="px-8 py-6 font-semibold text-slate-800">{rule.field}</td>
-                                                <td className={`px-8 py-6 font-semibold ${rule.status === 'FAIL' ? 'text-[#ef4444]' : 'text-[#22c55e]'}`}>
-                                                    {rule.score}
-                                                </td>
-                                                <td className="px-8 py-6">
-                                                    <span className={`font-semibold ${rule.status === 'FAIL' ? 'text-[#ef4444]' : 'text-[#22c55e]'}`}>
-                                                        {rule.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-8 py-6 text-slate-600">{rule.details || rule.detail}</td>
-                                            </tr>
+                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                            <div className="p-6 border-b border-slate-100 flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+                                <div>
+                                    <h2 className="text-base font-bold text-slate-900">Rule Execution Log</h2>
+                                    <p className="mt-1 text-sm font-medium text-slate-500">
+                                        Detailed breakdown of validation rules applied to this batch
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                                        {['ALL', 'FAIL', 'PASS'].map(s => (
+                                            <button 
+                                                key={s} 
+                                                onClick={() => setStatusFilter(s)} 
+                                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                    statusFilter === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                                                }`}
+                                            >
+                                                {s}
+                                            </button>
                                         ))}
-                                    </tbody>
-                                </table>
-                                {/* 6. Loading UI */}
-                                {loading && (
-                                    <div className="p-10 text-center text-slate-400">Loading quality data...</div>
-                                )}
+                                    </div>
+                                    <div className="relative">
+                                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search fields..." 
+                                            className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-blue-400 w-full sm:w-64" 
+                                            onChange={(e) => setSearchTerm(e.target.value)} 
+                                        />
+                                    </div>
+                                </div>
                             </div>
+                            <QualityTable data={filteredRules} />
                         </div>
                     </div>
                 </main>
