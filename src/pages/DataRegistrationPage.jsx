@@ -920,8 +920,7 @@
 
 
 
-// NEW CODE:- WITH MOCK DATA SERVER:-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar'; 
 import Header from '../components/Header';
@@ -930,6 +929,8 @@ import { useAuth } from '../context/AuthContext';
 import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX, FiShield } from 'react-icons/fi';
 // Import Toast
 import toast, { Toaster } from 'react-hot-toast';
+
+const Required = () => <span className="text-destructive ml-1 text-red-500">*</span>;
 
 const DataRegistrationPage = () => {
   const { user } = useAuth();
@@ -958,8 +959,6 @@ const DataRegistrationPage = () => {
   const [tempUpstream, setTempUpstream] = useState("");
   const [tempDownstream, setTempDownstream] = useState("");
   const [currentRule, setCurrentRule] = useState({ field: '', type: 'UNIQUE_CONSTRAINT', key: '', value: '' });
-
-  const Required = () => <span className="text-destructive ml-1 text-red-500">*</span>;
 
   // --- Handlers ---
   const handleInputChange = (e) => {
@@ -1044,7 +1043,7 @@ const DataRegistrationPage = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/datasets", payload);
+      await axios.post("http://localhost:3000/api/v1/datasets", payload);
       
       // Professional Success Toast
       toast.success('Dataset Registered Successfully!', { 
@@ -1064,6 +1063,7 @@ const DataRegistrationPage = () => {
         governance_rule: 'GDPR', retention_months: '', retention_days: '', is_masked: false
       });
       setRules([]); setUpstreams([]); setDownstreams([]);
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       // Professional Error Toast
       toast.error('Registration failed. Server error.', { 
@@ -1131,7 +1131,6 @@ const DataRegistrationPage = () => {
                       <option value="CSV">CSV</option>
                       <option value="JSON">JSON</option>
                       <option value="XLS">XLS</option>
-                      <option value="Postgres">Postgres</option>
                     </select>
                   </div>
                 </div>
@@ -1216,8 +1215,8 @@ const DataRegistrationPage = () => {
                       <option value="NOT_NULL">NOT_NULL</option>
                       <option value="REGEX">REGEX</option>
                     </select>
-                    <input className="search-input !pl-4" placeholder="arg key" value={currentRule.key} onChange={(e) => setCurrentRule({...currentRule, key: e.target.value})} />
-                    <input className="search-input !pl-4" placeholder="arg value" value={currentRule.value} onChange={(e) => setCurrentRule({...currentRule, value: e.target.value})} />
+                    {/* <input className="search-input !pl-4" placeholder="arg key" value={currentRule.key} onChange={(e) => setCurrentRule({...currentRule, key: e.target.value})} />
+                    <input className="search-input !pl-4" placeholder="arg value" value={currentRule.value} onChange={(e) => setCurrentRule({...currentRule, value: e.target.value})} /> */}
                   </div>
                   <button type="button" onClick={handleAddRule} className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer">
                     <FiPlus size={18} /> Add Rule

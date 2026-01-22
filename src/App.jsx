@@ -206,6 +206,7 @@ import DataStewardDashboard from './pages/DataStewardDashboard';
 import DataRegistrationPage from './pages/DataRegistrationPage';
 import LineagePage from './pages/LineagePage'
 import NotFoundPage from './pages/NotFoundPage';
+import AllDatasetsView from './components/AllDatasetsView';
 
 // Import Compliance Pages
 import ComplianceDashboard from './pages/Compliance/Dashboard';
@@ -270,6 +271,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <DataRegistrationPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/all-datasets"
+            element={
+              <ProtectedRoute>
+                <AllDatasetsView />
               </ProtectedRoute>
             }
           />

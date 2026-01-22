@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import SidebarToggle from '../components/SidebarToggle';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import { FiRefreshCw, FiDownload, FiAlertCircle, FiActivity, FiCheckCircle, FiLoader } from 'react-icons/fi';
 
 const DataQualityDashboard = () => {
@@ -32,6 +33,44 @@ const DataQualityDashboard = () => {
         fetchQualityRules();
     }, []);
 
+    // 4. Function to download Excel file
+    const downloadExcel = () => {
+        if (rules.length === 0) {
+            alert('No data to download');
+            return;
+        }
+
+        // Transform the data for Excel
+        const excelData = rules.map((rule) => ({
+            'Rule ID': rule.id,
+            'Field Name': rule.field,
+            'Score': rule.score,
+            'Status': rule.status,
+            'Diagnostic Detail': rule.details || rule.detail,
+        }));
+
+        // Create a new workbook and worksheet
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Quality Rules');
+
+        // Set column widths
+        worksheet['!cols'] = [
+            { wch: 12 },
+            { wch: 18 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 30 },
+        ];
+
+        // Generate filename with timestamp
+        const timestamp = new Date().toISOString().split('T')[0];
+        const filename = `DataQuality_${timestamp}.xlsx`;
+
+        // Trigger download
+        XLSX.writeFile(workbook, filename);
+    };
+
     return (
         <div className="flex min-h-screen bg-[#f8fafc] font-inter">
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
@@ -51,8 +90,12 @@ const DataQualityDashboard = () => {
                                 <p className="text-slate-500 text-sm mt-1">Batch ID: Customer_Data_Batch_#080126</p>
                             </div>
                             <div className="flex gap-3">
-                                <button className="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-semibold shadow-sm hover:bg-slate-50 transition-all cursor-pointer">
-                                    <FiDownload /> Download CSV
+                                <button 
+                                    onClick={downloadExcel}
+                                    disabled={loading || rules.length === 0}
+                                    className="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-semibold shadow-sm hover:bg-slate-50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <FiDownload /> Download Excel
                                 </button>
                                 {/* 4. Added onClick and loading state to button */}
                                 <button 

@@ -95,7 +95,10 @@ const Dashboard = () => {
                         <div className="bg-white border border-slate-100 rounded-2xl shadow-sm">
                             <div className="p-6 flex justify-between items-center">
                                 <h2 className="text-xl font-bold text-[#1e293b]">Registered Dataset</h2>
-                                <button className="text-sm font-medium text-slate-500 border border-slate-200 px-4 py-1.5 rounded-xl hover:bg-slate-50 cursor-pointer">View All</button>
+                                <button 
+                                    onClick={() => navigate('/all-datasets')}
+                                    className="text-sm font-medium text-slate-500 border border-slate-200 px-4 py-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+                                >View All</button>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
