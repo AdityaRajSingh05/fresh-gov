@@ -919,14 +919,419 @@
 
 
 
+// NEW CODE:-
+// import React, { useState } from 'react';
+// import axios from 'axios';
+// import Sidebar from '../components/Sidebar'; 
+// import Header from '../components/Header';
+// import SidebarToggle from '../components/SidebarToggle';
+// import { useAuth } from '../context/AuthContext';
+// import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX, FiShield } from 'react-icons/fi';
+// // Import Toast
+// import toast, { Toaster } from 'react-hot-toast';
 
+// const Required = () => <span className="text-destructive ml-1 text-red-500">*</span>;
+
+// const DataRegistrationPage = () => {
+//   const { user } = useAuth();
+//   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+//   // --- Form State ---
+//   const [formData, setFormData] = useState({
+//     name: '',
+//     owner_unit_id: '',
+//     department: '',
+//     source_type: '',
+//     classification: 'INTERNAL',
+//     domain: '',
+//     description: '',
+//     owner_contact: '',
+//     governance_rule: 'GDPR',
+//     retention_months: '',
+//     retention_days: '',
+//     is_masked: false
+//   });
+
+//   const [upstreams, setUpstreams] = useState([]);
+//   const [downstreams, setDownstreams] = useState([]);
+//   const [rules, setRules] = useState([]);
+  
+//   const [tempUpstream, setTempUpstream] = useState("");
+//   const [tempDownstream, setTempDownstream] = useState("");
+//   const [currentRule, setCurrentRule] = useState({ field: '', type: 'UNIQUE_CONSTRAINT', key: '', value: '' });
+
+//   // --- Handlers ---
+//   const handleInputChange = (e) => {
+//     const { name, value, type, checked } = e.target;
+//     setFormData(prev => ({ 
+//       ...prev, 
+//       [name]: type === 'checkbox' ? checked : value 
+//     }));
+//   };
+
+//   const addUpstream = () => {
+//     if (tempUpstream.trim()) {
+//       setUpstreams([...upstreams, tempUpstream]);
+//       setTempUpstream(""); 
+//     }
+//   };
+
+//   const addDownstream = () => {
+//     if (tempDownstream.trim()) {
+//       setDownstreams([...downstreams, tempDownstream]);
+//       setTempDownstream(""); 
+//     }
+//   };
+
+//   const handleAddRule = () => {
+//     if (currentRule.field.trim()) {
+//       setRules([...rules, { ...currentRule }]);
+//       setCurrentRule({ field: '', type: 'UNIQUE_CONSTRAINT', key: '', value: '' }); 
+//     }
+//   };
+
+//   const removeRule = (index) => setRules(rules.filter((_, i) => i !== index));
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+    
+//     // Professional Loading Toast
+//     const loadingToast = toast.loading('Registering dataset...', {
+//       style: {
+//         borderRadius: '10px',
+//         background: '#fff',
+//         color: '#333',
+//         border: '1px solid #e2e8f0',
+//         fontWeight: '600'
+//       },
+//     });
+
+//     const mappedRules = {};
+//     rules.forEach(r => {
+//       if (!mappedRules[r.field]) mappedRules[r.field] = [];
+//       mappedRules[r.field].push({
+//         rule: r.type,
+//         args: r.key ? { [r.key]: r.value } : {}
+//       });
+//     });
+
+//     const payload = {
+//       name: formData.name,
+//       fqn: `ferrari.${formData.domain.toLowerCase() || 'general'}.${formData.name}`,
+//       source_type: formData.source_type,
+//       owner_unit_id: parseInt(formData.owner_unit_id),
+//       operator_id: user?.id || 1, 
+//       classification: formData.classification,
+//       description: formData.description,
+//       metadata: {
+//         description: formData.description,
+//         tags: {
+//           domain: formData.domain,
+//           upstreams: upstreams,
+//           downstreams: downstreams
+//         },
+//         validation_rules: mappedRules,
+//         governance: {
+//           policy: formData.governance_rule,
+//           retention_period: `${formData.retention_months}m ${formData.retention_days}d`,
+//           is_masked: formData.is_masked
+//         },
+//         version_id: 1,
+//         created_at: new Date().toISOString(),
+//         updated_at: new Date().toISOString()
+//       }
+//     };
+
+//     try {
+//       await axios.post("http://localhost:3000/api/v1/datasets", payload);
+      
+//       // Professional Success Toast
+//       toast.success('Dataset Registered Successfully!', { 
+//         id: loadingToast,
+//         style: {
+//           borderRadius: '10px',
+//           background: '#fff',
+//           color: '#10b981', // Green text
+//           border: '1px solid #10b981',
+//           fontWeight: '700'
+//         }
+//       });
+      
+//       setFormData({ 
+//         name: '', owner_unit_id: '', department: '', source_type: '', 
+//         classification: 'INTERNAL', domain: '', description: '', owner_contact: '',
+//         governance_rule: 'GDPR', retention_months: '', retention_days: '', is_masked: false
+//       });
+//       setRules([]); setUpstreams([]); setDownstreams([]);
+//     // eslint-disable-next-line no-unused-vars
+//     } catch (error) {
+//       // Professional Error Toast
+//       toast.error('Registration failed. Server error.', { 
+//         id: loadingToast,
+//         style: {
+//           borderRadius: '10px',
+//           background: '#fff',
+//           color: '#ef4444', // Red text
+//           border: '1px solid #ef4444',
+//           fontWeight: '700'
+//         }
+//       });
+//     }
+//   };
+
+//   return (
+//     <div className="flex min-h-screen bg-background font-inter">
+//       {/* Toast Container - Force top-right and professional padding */}
+//       <Toaster 
+//         position="top-right" 
+//         toastOptions={{
+//             duration: 4000,
+//         }}
+//       />
+
+//       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
+//       <div className="flex-1 flex flex-col min-w-0">
+//         <div className="header-with-toggle">
+//           <SidebarToggle isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
+//           <Header />
+//         </div>
+
+//         <main className="flex-1 overflow-y-auto p-6 md:p-10">
+//           <div className="max-w-6xl mx-auto">
+//             <div className="flex items-center gap-4 mb-8">
+//               <div className="metric-icon blue"><FiDatabase size={24} /></div>
+//               <h1 className="text-3xl font-bold text-foreground">Register Dataset</h1>
+//             </div>
+
+//             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+//               <form className="p-8 space-y-8" onSubmit={handleSubmit}>
+                
+//                 {/* 1. Basic Info */}
+//                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Owner <Required /></label>
+//                     <select name="owner_unit_id" value={formData.owner_unit_id} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+//                       <option value="">-- Select Owner --</option>
+//                       <option value="1">Ferrari</option>
+//                     </select>
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Department <Required /></label>
+//                     <select name="department" value={formData.department} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+//                       <option value="">-- Select Department --</option>
+//                       <option value="Sourcing">Data Sourcing</option>
+//                       <option value="CRM">CRM Team</option>
+//                     </select>
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Data Source <Required /></label>
+//                     <select name="source_type" value={formData.source_type} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+//                       <option value="">-- Select Type --</option>
+//                       <option value="CSV">CSV</option>
+//                       <option value="JSON">JSON</option>
+//                       <option value="XLS">XLS</option>
+//                     </select>
+//                   </div>
+//                 </div>
+
+//                 {/* 2. Classification & Name */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Classification <Required /></label>
+//                     <select name="classification" value={formData.classification} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+//                       <option value="PUBLIC">Public</option>
+//                       <option value="INTERNAL">Internal</option>
+//                       <option value="CONFIDENTIAL">Confidential</option>
+//                       <option value="SENSITIVE">Sensitive</option>
+//                     </select>
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Dataset Name <Required /></label>
+//                     <input name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="e.g., external_leads_feed" className="search-input !pl-4" />
+//                   </div>
+//                 </div>
+
+//                 {/* 3. Domain & Description */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Domain <Required /></label>
+//                     <input name="domain" type="text" value={formData.domain} onChange={handleInputChange} placeholder="e.g., Sales" className="search-input !pl-4" />
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="text-sm font-semibold text-foreground">Short Description</label>
+//                     <input name="description" type="text" value={formData.description} onChange={handleInputChange} placeholder="Brief description" className="search-input !pl-4" />
+//                   </div>
+//                 </div>
+
+//                 {/* 4. Owner Contact */}
+//                 <div className="max-w-md space-y-2">
+//                   <label className="text-sm font-semibold text-foreground">Owner Contact</label>
+//                   <input name="owner_contact" type="text" value={formData.owner_contact} onChange={handleInputChange} placeholder="owner email or slack" className="search-input !pl-4" />
+//                 </div>
+
+//                 <hr className="border-border" />
+
+//                 {/* 5. Upstream & Downstream */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+//                   <div className="space-y-4">
+//                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Upstream Source <Required /></h3>
+//                     <div className="flex flex-wrap gap-2 min-h-[30px]">
+//                       {upstreams.map((s, i) => (
+//                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-200">
+//                           {s} <FiX className="cursor-pointer" onClick={() => setUpstreams(upstreams.filter((_, idx) => idx !== i))} />
+//                         </span>
+//                       ))}
+//                     </div>
+//                     <div className="flex gap-2">
+//                       <input className="search-input !pl-4 flex-1" placeholder="Add source..." value={tempUpstream} onChange={(e) => setTempUpstream(e.target.value)} />
+//                       <button type="button" onClick={addUpstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer">Add</button>
+//                     </div>
+//                   </div>
+
+//                   <div className="space-y-4">
+//                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Downstream Source <Required /></h3>
+//                     <div className="flex flex-wrap gap-2 min-h-[30px]">
+//                       {downstreams.map((s, i) => (
+//                         <span key={i} className="flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-bold border border-purple-200">
+//                           {s} <FiX className="cursor-pointer" onClick={() => setDownstreams(downstreams.filter((_, idx) => idx !== i))} />
+//                         </span>
+//                       ))}
+//                     </div>
+//                     <div className="flex gap-2">
+//                       <input className="search-input !pl-4 flex-1" placeholder="Add target..." value={tempDownstream} onChange={(e) => setTempDownstream(e.target.value)} />
+//                       <button type="button" onClick={addDownstream} className="bg-indigo-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-indigo-600 cursor-pointer">Add</button>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* 6. Validation Rules Section */}
+//                 <div className="space-y-4 border-t border-border pt-6">
+//                   <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Validation Rules</h3>
+//                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+//                     <input className="search-input !pl-4" placeholder="Field name" value={currentRule.field} onChange={(e) => setCurrentRule({...currentRule, field: e.target.value})} />
+//                     <select className="search-input !pl-4 cursor-pointer" value={currentRule.type} onChange={(e) => setCurrentRule({...currentRule, type: e.target.value})}>
+//                       <option value="UNIQUE">UNIQUE</option>
+//                       <option value="NOT_NULL">NOT_NULL</option>
+//                       <option value="REGEX">REGEX</option>
+//                     </select>
+//                     {/* <input className="search-input !pl-4" placeholder="arg key" value={currentRule.key} onChange={(e) => setCurrentRule({...currentRule, key: e.target.value})} />
+//                     <input className="search-input !pl-4" placeholder="arg value" value={currentRule.value} onChange={(e) => setCurrentRule({...currentRule, value: e.target.value})} /> */}
+//                   </div>
+//                   <button type="button" onClick={handleAddRule} className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer">
+//                     <FiPlus size={18} /> Add Rule
+//                   </button>
+
+//                   {rules.length > 0 && (
+//                     <div className="border border-border rounded-lg overflow-hidden mt-2">
+//                       <table className="w-full text-sm text-left">
+//                         <thead className="bg-muted/50 text-xs uppercase text-muted-foreground font-semibold">
+//                           <tr>
+//                             <th className="px-4 py-3">Field Name</th>
+//                             <th className="px-4 py-3">Rule Type</th>
+//                             <th className="px-4 py-3">Arguments</th>
+//                             <th className="px-4 py-3 text-right">Action</th>
+//                           </tr>
+//                         </thead>
+//                         <tbody className="divide-y divide-border">
+//                           {rules.map((rule, index) => (
+//                             <tr key={index} className="hover:bg-muted/20">
+//                               <td className="px-4 py-2.5 font-medium">{rule.field}</td>
+//                               <td className="px-4 py-2.5">{rule.type}</td>
+//                               <td className="px-4 py-2.5 font-mono text-xs">{rule.key}: {rule.value}</td>
+//                               <td className="px-4 py-2.5 text-right">
+//                                 <button type="button" onClick={() => removeRule(index)} className="text-destructive p-1.5"><FiTrash2 size={16} /></button>
+//                               </td>
+//                             </tr>
+//                           ))}
+//                         </tbody>
+//                       </table>
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 {/* 7. Governance Policies */}
+//                 <div className="space-y-6 border-t border-border pt-6">
+//                   <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Governance Policies</h3>
+//                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                     <div className="space-y-2">
+//                       <label className="text-sm font-semibold text-foreground">Governance Rule <Required /></label>
+//                       <select name="governance_rule" value={formData.governance_rule} onChange={handleInputChange} className="search-input !pl-4 cursor-pointer">
+//                         <option value="GDPR">GDPR</option>
+//                         <option value="ISO">ISO 27001</option>
+//                         <option value="NONE">None / Internal</option>
+//                       </select>
+//                     </div>
+//                     <div className="space-y-2">
+//                       <label className="text-sm font-semibold text-foreground">Retention Period <Required /></label>
+//                       <div className="flex gap-2">
+//                         <input name="retention_months" type="number" value={formData.retention_months} onChange={handleInputChange} placeholder="Months" className="search-input !pl-4" />
+//                         <input name="retention_days" type="number" value={formData.retention_days} onChange={handleInputChange} placeholder="Days" className="search-input !pl-4" />
+//                       </div>
+//                     </div>
+//                     <div className="flex items-end pb-2">
+//                       <label className="flex items-center gap-3 cursor-pointer group">
+//                         <input name="is_masked" type="checkbox" checked={formData.is_masked} onChange={handleInputChange} className="w-5 h-5 cursor-pointer" />
+//                         <span className="text-sm font-semibold text-foreground">Dataset is Masked</span>
+//                       </label>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* Footer Buttons */}
+//                 <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-6 border-t border-border">
+//                   <div className="flex gap-4 w-full sm:w-auto">
+//                     <button type="submit" className="bg-[#00a65a] text-white px-8 py-3 rounded-md font-bold text-sm hover:brightness-105 cursor-pointer">
+//                       Register Dataset
+//                     </button>
+//                     <button type="button" onClick={() => {setRules([]); setUpstreams([]); setDownstreams([]);}} className="bg-white border border-border text-foreground px-8 py-3 rounded-md font-bold text-sm hover:bg-muted cursor-pointer">
+//                       Reset
+//                     </button>
+//                   </div>
+//                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
+//                     <FiInfo className="text-primary" size={18} />
+//                     <span><strong>Tip:</strong> Ensure all fields with * are filled.</span>
+//                   </div>
+//                 </div>
+//               </form>
+//             </div>
+//           </div>
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DataRegistrationPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// NEW CODE:-
 import React, { useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar'; 
 import Header from '../components/Header';
 import SidebarToggle from '../components/SidebarToggle';
 import { useAuth } from '../context/AuthContext';
-import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX, FiShield } from 'react-icons/fi';
+import { FiDatabase, FiPlus, FiTrash2, FiInfo, FiX, FiShield, FiCode } from 'react-icons/fi';
 // Import Toast
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -992,10 +1397,45 @@ const DataRegistrationPage = () => {
 
   const removeRule = (index) => setRules(rules.filter((_, i) => i !== index));
 
+  // --- Helper for JSON Preview ---
+  const getMappedRules = () => {
+    const mappedRules = {};
+    rules.forEach(r => {
+      if (!mappedRules[r.field]) mappedRules[r.field] = [];
+      mappedRules[r.field].push({
+        rule: r.type,
+        args: r.key ? { [r.key]: r.value } : {}
+      });
+    });
+    return mappedRules;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const isBasicInfoMissing = 
+        !formData.name.trim() || 
+        !formData.owner_unit_id || 
+        !formData.department || 
+        !formData.source_type || 
+        !formData.domain.trim();
     
-    // Professional Loading Toast
+    const isRetentionMissing = !formData.retention_months || !formData.retention_days;
+    const isLineageMissing = upstreams.length === 0 || downstreams.length === 0;
+
+    if (isBasicInfoMissing || isRetentionMissing || isLineageMissing) {
+      toast.error('Validation Error: Please fill all fields marked with *', {
+        style: {
+          borderRadius: '10px',
+          background: '#fff',
+          color: '#ef4444',
+          border: '1px solid #ef4444',
+          fontWeight: '700'
+        }
+      });
+      return;
+    }
+
     const loadingToast = toast.loading('Registering dataset...', {
       style: {
         borderRadius: '10px',
@@ -1004,15 +1444,6 @@ const DataRegistrationPage = () => {
         border: '1px solid #e2e8f0',
         fontWeight: '600'
       },
-    });
-
-    const mappedRules = {};
-    rules.forEach(r => {
-      if (!mappedRules[r.field]) mappedRules[r.field] = [];
-      mappedRules[r.field].push({
-        rule: r.type,
-        args: r.key ? { [r.key]: r.value } : {}
-      });
     });
 
     const payload = {
@@ -1030,7 +1461,7 @@ const DataRegistrationPage = () => {
           upstreams: upstreams,
           downstreams: downstreams
         },
-        validation_rules: mappedRules,
+        validation_rules: getMappedRules(),
         governance: {
           policy: formData.governance_rule,
           retention_period: `${formData.retention_months}m ${formData.retention_days}d`,
@@ -1044,14 +1475,12 @@ const DataRegistrationPage = () => {
 
     try {
       await axios.post("http://localhost:3000/api/v1/datasets", payload);
-      
-      // Professional Success Toast
       toast.success('Dataset Registered Successfully!', { 
         id: loadingToast,
         style: {
           borderRadius: '10px',
           background: '#fff',
-          color: '#10b981', // Green text
+          color: '#10b981',
           border: '1px solid #10b981',
           fontWeight: '700'
         }
@@ -1063,15 +1492,13 @@ const DataRegistrationPage = () => {
         governance_rule: 'GDPR', retention_months: '', retention_days: '', is_masked: false
       });
       setRules([]); setUpstreams([]); setDownstreams([]);
-    // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      // Professional Error Toast
       toast.error('Registration failed. Server error.', { 
         id: loadingToast,
         style: {
           borderRadius: '10px',
           background: '#fff',
-          color: '#ef4444', // Red text
+          color: '#ef4444',
           border: '1px solid #ef4444',
           fontWeight: '700'
         }
@@ -1081,13 +1508,7 @@ const DataRegistrationPage = () => {
 
   return (
     <div className="flex min-h-screen bg-background font-inter">
-      {/* Toast Container - Force top-right and professional padding */}
-      <Toaster 
-        position="top-right" 
-        toastOptions={{
-            duration: 4000,
-        }}
-      />
+      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
 
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
@@ -1207,47 +1628,60 @@ const DataRegistrationPage = () => {
 
                 {/* 6. Validation Rules Section */}
                 <div className="space-y-4 border-t border-border pt-6">
-                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Validation Rules</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input className="search-input !pl-4" placeholder="Field name" value={currentRule.field} onChange={(e) => setCurrentRule({...currentRule, field: e.target.value})} />
-                    <select className="search-input !pl-4 cursor-pointer" value={currentRule.type} onChange={(e) => setCurrentRule({...currentRule, type: e.target.value})}>
-                      <option value="UNIQUE">UNIQUE</option>
-                      <option value="NOT_NULL">NOT_NULL</option>
-                      <option value="REGEX">REGEX</option>
-                    </select>
-                    {/* <input className="search-input !pl-4" placeholder="arg key" value={currentRule.key} onChange={(e) => setCurrentRule({...currentRule, key: e.target.value})} />
-                    <input className="search-input !pl-4" placeholder="arg value" value={currentRule.value} onChange={(e) => setCurrentRule({...currentRule, value: e.target.value})} /> */}
-                  </div>
-                  <button type="button" onClick={handleAddRule} className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer">
-                    <FiPlus size={18} /> Add Rule
-                  </button>
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Validation Rules <Required /></h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left side: Input Form */}
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input className="search-input !pl-4" placeholder="Field name" value={currentRule.field} onChange={(e) => setCurrentRule({...currentRule, field: e.target.value})} />
+                            <select className="search-input !pl-4 cursor-pointer" value={currentRule.type} onChange={(e) => setCurrentRule({...currentRule, type: e.target.value})}>
+                            <option value="UNIQUE">UNIQUE</option>
+                            <option value="NOT_NULL">NOT_NULL</option>
+                            <option value="REGEX">REGEX</option>
+                            </select>
+                        </div>
+                        <button type="button" onClick={handleAddRule} className="flex items-center gap-2 bg-indigo-500 text-white px-6 py-2.5 rounded-md text-sm font-bold shadow-sm cursor-pointer hover:bg-indigo-600">
+                            <FiPlus size={18} /> Add Rule
+                        </button>
 
-                  {rules.length > 0 && (
-                    <div className="border border-border rounded-lg overflow-hidden mt-2">
-                      <table className="w-full text-sm text-left">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground font-semibold">
-                          <tr>
-                            <th className="px-4 py-3">Field Name</th>
-                            <th className="px-4 py-3">Rule Type</th>
-                            <th className="px-4 py-3">Arguments</th>
-                            <th className="px-4 py-3 text-right">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                          {rules.map((rule, index) => (
-                            <tr key={index} className="hover:bg-muted/20">
-                              <td className="px-4 py-2.5 font-medium">{rule.field}</td>
-                              <td className="px-4 py-2.5">{rule.type}</td>
-                              <td className="px-4 py-2.5 font-mono text-xs">{rule.key}: {rule.value}</td>
-                              <td className="px-4 py-2.5 text-right">
-                                <button type="button" onClick={() => removeRule(index)} className="text-destructive p-1.5"><FiTrash2 size={16} /></button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        {rules.length > 0 && (
+                            <div className="border border-border rounded-lg overflow-hidden mt-2">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-muted/50 text-xs uppercase text-muted-foreground font-semibold">
+                                <tr>
+                                    <th className="px-4 py-3">Field Name</th>
+                                    <th className="px-4 py-3">Rule Type</th>
+                                    <th className="px-4 py-3 text-right">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                {rules.map((rule, index) => (
+                                    <tr key={index} className="hover:bg-muted/20">
+                                    <td className="px-4 py-2.5 font-medium">{rule.field}</td>
+                                    <td className="px-4 py-2.5 text-xs bg-slate-100 rounded inline-block m-2 px-2 font-bold">{rule.type}</td>
+                                    <td className="px-4 py-2.5 text-right">
+                                        <button type="button" onClick={() => removeRule(index)} className="text-red-500 p-1.5 hover:bg-red-50 rounded-full transition-colors"><FiTrash2 size={16} /></button>
+                                    </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                            </div>
+                        )}
                     </div>
-                  )}
+
+                    {/* Right side: JSON Preview Requirement */}
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-widest">
+                            <FiCode className="text-indigo-500" /> Live Logic Preview
+                        </label>
+                        <div className="bg-[#1e293b] rounded-xl p-4 h-full min-h-[150px] shadow-inner border border-slate-700">
+                            <pre className="text-indigo-300 text-[11px] leading-relaxed font-mono">
+                                {JSON.stringify(getMappedRules(), null, 2)}
+                            </pre>
+                        </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 7. Governance Policies */}
