@@ -6,16 +6,12 @@ import Header from '../components/Header';
 import SidebarToggle from '../components/SidebarToggle';
 import PolicyStats from '../components/governance/PolicyStats';
 import PolicyList from '../components/governance/PolicyList';
-import PolicyForm from '../components/governance/PolicyForm';
-import ConfirmationDialog from '../components/governance/ConfirmationDialog';
+import PolicyWizard from '../components/governance/PolicyWizard';
 
 import {
     getPolicies,
     getDatasets,
     createPolicy,
-    updatePolicy,
-    deletePolicy,
-    enforcePolicy,
     getPolicyStats
 } from '../services/governanceApi';
 
@@ -28,17 +24,12 @@ function GovernancePolicy() {
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Form state
-    const [showForm, setShowForm] = useState(false);
-    const [editingPolicy, setEditingPolicy] = useState(null);
 
-    // Confirmation dialog state
-    const [confirmDialog, setConfirmDialog] = useState({
-        isOpen: false,
-        policy: null,
-        actionType: '',
-        onConfirm: null
-    });
+
+    // Wizard state
+    const [isWizardOpen, setIsWizardOpen] = useState(false);
+
+
 
     // Filter policies based on search query (wrapped in useMemo to prevent re-render issues)
     const filteredPolicies = useMemo(() => {
@@ -56,36 +47,8 @@ function GovernancePolicy() {
                 String(policy.status || '')
             ].map(field => field.toLowerCase());
 
-            // For the status field specifically, do exact word matching
-            // This prevents "Active" from matching "Inactive"
-            const statusValue = String(policy.status || '').toLowerCase();
-            if (statusValue === query) {
-                return true; // Exact match on status
-            }
-
-            // For other fields, use substring matching but with word boundary awareness
-            return searchableFields.some(field => {
-                // Exact match
-                if (field === query) return true;
-
-                // Contains as substring (for IDs, names with multiple words)
-                if (field.includes(query)) {
-                    // But avoid matching "active" within "inactive"
-                    // Check if it's at a word boundary
-                    const words = field.split(/\W+/); // Split by non-word characters
-                    const queryWords = query.split(/\s+/);
-
-                    // If query is a single word, check if it exists as a complete word
-                    if (queryWords.length === 1) {
-                        return words.some(word => word === query || field.startsWith(query));
-                    }
-
-                    // For multi-word queries, use substring match
-                    return true;
-                }
-
-                return false;
-            });
+            // Simple substring match for all fields
+            return searchableFields.some(field => field.includes(query));
         });
     }, [policies, searchQuery]);
 
@@ -130,83 +93,32 @@ function GovernancePolicy() {
         }
     };
 
-    const handleCreatePolicy = () => {
-        setEditingPolicy(null);
-        setShowForm(true);
-    };
+    const handleWizardSubmit = async (wizardData) => {
+        try {
+            // Transform wizard data to API format (Frontend Model)
+            const policyPayload = {
+                name: wizardData.name,
+                policyType: wizardData.policyType,
+                // If editing, preserve existing status.
+                // Status is ALWAYS Active for new policies (Datasets are mandatory)
+                status: 'Active',
+                datasets: wizardData.selectedDatasets,
+                retentionDays: wizardData.retentionDays,
+                maskingFields: wizardData.maskingFields
+            };
 
-    const handleEditPolicy = (policy) => {
-        setEditingPolicy(policy);
-        setShowForm(true);
-    };
+            await createPolicy(policyPayload);
 
-    const handleDeletePolicy = (policyId) => {
-        const policy = policies.find(p => p.id === policyId);
-
-        setConfirmDialog({
-            isOpen: true,
-            policy,
-            actionType: 'Delete Policy',
-            onConfirm: async () => {
-                try {
-                    await deletePolicy(policyId);
-                    await loadData();
-                    setConfirmDialog({ isOpen: false, policy: null, actionType: '', onConfirm: null });
-                } catch (err) {
-                    console.error('Error deleting policy:', err);
-                    alert('Failed to delete policy: ' + (err.message || 'Unknown error'));
-                }
-            }
-        });
-    };
-
-    const handleSubmitPolicy = async (policyData) => {
-        const isCriticalPolicy = policyData.policyType === 'Data Masking' ||
-            policyData.policyType === 'Retention';
-
-        const executeSubmit = async () => {
-            try {
-                if (editingPolicy) {
-                    await updatePolicy(editingPolicy.id, policyData);
-                } else {
-                    const newPolicy = await createPolicy(policyData);
-
-                    // Enforce policy if datasets are assigned
-                    if (policyData.datasets && policyData.datasets.length > 0) {
-                        await enforcePolicy({
-                            policyId: newPolicy.data.id,
-                            datasetIds: policyData.datasets
-                        });
-                    }
-                }
-
-                await loadData();
-                setShowForm(false);
-                setConfirmDialog({ isOpen: false, policy: null, actionType: '', onConfirm: null });
-            } catch (err) {
-                console.error('Error saving policy:', err);
-                alert('Failed to save policy: ' + (err.message || 'Unknown error'));
-            }
-        };
-
-        // Show confirmation for critical policies
-        if (isCriticalPolicy && !editingPolicy) {
-            setConfirmDialog({
-                isOpen: true,
-                policy: policyData,
-                actionType: 'Apply Policy',
-                onConfirm: executeSubmit
-            });
-        } else {
-            await executeSubmit();
+            await loadData(); // Reload data to show changes
+            setIsWizardOpen(false);
+        } catch (error) {
+            console.error('Error saving policy:', error);
+            setError({ message: 'Failed to create policy. Please try again.' });
         }
     };
 
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
     const closeSidebar = () => setSidebarOpen(false);
-
-    // Calculate violation count for header
-    const violationCount = stats?.totalViolations || 0;
 
     return (
         <div className="flex min-h-screen">
@@ -224,20 +136,6 @@ function GovernancePolicy() {
                         onSearchChange={(e) => setSearchQuery(e.target.value)}
                         searchPlaceholder="Search policies by ID, name, type, or status..."
                     />
-
-                    {/* Violation Count Badge */}
-                    {violationCount > 0 && (
-                        <div
-                            className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-md whitespace-nowrap flex-shrink-0"
-                            role="status"
-                            aria-live="polite"
-                        >
-                            <FiAlertCircle className="text-red-600" size={16} />
-                            <span className="text-sm font-medium text-red-700">
-                                {violationCount} violation{violationCount !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                    )}
                 </header>
 
                 {/* Content Area */}
@@ -252,6 +150,13 @@ function GovernancePolicy() {
                                 Monitor GDPR/ISO policies and compliance across datasets
                             </p>
                         </div>
+                        <button
+                            onClick={() => window.location.href = '/governance/create'}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium text-sm shadow-sm"
+                        >
+                            <FiPlus size={20} />
+                            <span>Create Policy</span>
+                        </button>
                     </div>
 
                     {/* Error State */}
@@ -308,25 +213,19 @@ function GovernancePolicy() {
                 </div>
             </main>
 
-            {/* Policy Form Modal */}
-            <PolicyForm
-                isOpen={showForm}
-                onClose={() => setShowForm(false)}
-                onSubmit={handleSubmitPolicy}
-                editPolicy={editingPolicy}
+            {/* Policy Wizard (used for both create and edit) */}
+            <PolicyWizard
+                isOpen={isWizardOpen}
+                onClose={() => {
+                    setIsWizardOpen(false);
+                }}
+                onSubmit={handleWizardSubmit}
                 datasets={datasets}
             />
 
-            {/* Confirmation Dialog */}
-            <ConfirmationDialog
-                isOpen={confirmDialog.isOpen}
-                onClose={() => setConfirmDialog({ isOpen: false, policy: null, actionType: '', onConfirm: null })}
-                onConfirm={confirmDialog.onConfirm}
-                policy={confirmDialog.policy}
-                actionType={confirmDialog.actionType}
-            />
         </div>
     );
 }
 
 export default GovernancePolicy;
+

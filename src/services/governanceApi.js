@@ -60,7 +60,9 @@ function transformPolicy(policy) {
         // Convert backend dataset_id (int) to frontend datasets (array of strings)
         datasets: policy.dataset_id ? [String(policy.dataset_id)] : [],
         lastReviewed: policy.last_reviewed || new Date().toISOString().split('T')[0],
-        violations: policy.status === 'VIOLATED' ? 1 : 0
+        violations: policy.status === 'VIOLATED' ? 1 : 0,
+        retentionDays: policy.retention_days,
+        maskingFields: policy.masking_fields || []
     };
 }
 
@@ -97,29 +99,13 @@ export async function createPolicy(policy) {
         status: policy.status === 'Active' ? 'ACTIVE' : 'INACTIVE',
         last_reviewed: new Date().toISOString().split('T')[0],
         description: policy.name,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        retention_days: policy.retentionDays,
+        masking_fields: policy.maskingFields
     };
 
     const response = await api.post('/governance_policy', serverPolicy);
     return { data: transformPolicy(response.data) };
-}
-
-export async function updatePolicy(id, updates) {
-    const serverPolicy = {
-        dataset_id: updates.datasets && updates.datasets.length > 0 ? Number(updates.datasets[0]) : null,
-        policy_type: updates.policyType,
-        status: updates.status === 'Active' ? 'ACTIVE' : 'INACTIVE',
-        description: updates.name,
-        last_reviewed: new Date().toISOString().split('T')[0]
-    };
-
-    const response = await api.put(`/governance_policy/${id}`, serverPolicy);
-    return { data: transformPolicy(response.data) };
-}
-
-export async function deletePolicy(id) {
-    await api.delete(`/governance_policy/${id}`);
-    return { success: true };
 }
 
 export async function getPolicyStats() {
@@ -135,9 +121,4 @@ export async function getPolicyStats() {
     return { data: { totalPolicies, activePolicies, totalViolations, complianceRate } };
 }
 
-export async function enforcePolicy(enforcement) {
-    const { policyId, datasetIds } = enforcement;
-    // We send the array of dataset IDs to the update function
-    const updates = { datasets: datasetIds };
-    return await updatePolicy(policyId, updates);
-}
+

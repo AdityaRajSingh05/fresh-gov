@@ -196,9 +196,11 @@
 
 
 // NEW CODE 2 :- WITH MOCK SERVER:-
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
 // Import your Pages/Components
 import LoginPage from './pages/LoginPage';
@@ -206,15 +208,14 @@ import DataStewardDashboard from './pages/DataStewardDashboard';
 import DataRegistrationPage from './pages/DataRegistrationPage';
 import LineagePage from './pages/LineagePage'
 import NotFoundPage from './pages/NotFoundPage';
-import AllDatasetsView from './components/AllDatasetsView';
 
 // Import Compliance Pages
-import ComplianceDashboard from './pages/Compliance/Dashboard';
-import AuditLogs from './pages/Compliance/AuditLogs';
-import Violations from './pages/Compliance/Violations';
+// ComplianceDashboard and Violations removed as they are unused
 import GovernancePolicy from './pages/GovernancePolicy';
+import CreatePolicy from './pages/CreatePolicy';
 import DataQualityDashboard from './pages/DataQualityDashboard';
 import QualityBatchList from './pages/QualityBatchList';
+import ComplianceReporting from './pages/ComplianceReporting';
 
 
 /**
@@ -250,6 +251,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <Toaster position="top-right" />
         <Routes>
           {/* Public Route: Login Page */}
           <Route path="/" element={<LoginPage />} />
@@ -276,47 +278,10 @@ function App() {
             }
           />
 
-          <Route
-            path="/all-datasets"
-            element={
-              <ProtectedRoute>
-                <AllDatasetsView />
-              </ProtectedRoute>
-            }
-          />
-
           <Route path="/lineage"
             element={
               <ProtectedRoute>
                 <LineagePage />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Compliance Officer Routes */}
-          <Route
-            path="/compliance-dashboard"
-            element={
-              <ProtectedRoute>
-                <ComplianceDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/audit-logs"
-            element={
-              <ProtectedRoute>
-                <AuditLogs />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/violations"
-            element={
-              <ProtectedRoute>
-                <Violations />
               </ProtectedRoute>
             }
           />
@@ -330,18 +295,26 @@ function App() {
             }
           />
 
-            {/* Data Quality Batch List */}
-        <Route 
-          path="/quality" 
-          element={
-            <ProtectedRoute>
-            <QualityBatchList />
-            </ProtectedRoute>
-          }
+          <Route
+            path="/governance/create"
+            element={
+              <ProtectedRoute>
+                <CreatePolicy />
+              </ProtectedRoute>
+            }
           />
 
-          {/* Data Quality Dashboard */}  
-           <Route
+          {/* Data Quality Routes */}
+          <Route
+            path="/quality"
+            element={
+              <ProtectedRoute>
+                <QualityBatchList />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/quality/:id"
             element={
               <ProtectedRoute>
@@ -350,14 +323,22 @@ function App() {
             }
           />
 
-
+          {/* Compliance Reporting Route (System Admin Only) */}
+          <Route
+            path="/compliance-reporting"
+            element={
+              <ProtectedRoute>
+                <ComplianceReporting />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 404 & Fallback Redirects */}
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </Router>
-    </AuthProvider>
+    </AuthProvider >
   );
 }
 

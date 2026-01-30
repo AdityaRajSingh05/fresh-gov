@@ -106,6 +106,7 @@
 
 
 // NEW CODE:-
+// NEW CODE:-
 import React, { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 
@@ -136,7 +137,13 @@ export function AuthProvider({ children }) {
     try {
       // Use the correct API endpoint from mock server
       const response = await axios.get("http://localhost:3000/api/v1/users");
-      const users = response.data;
+      // Handle both array response and object response with 'users' key
+      const users = Array.isArray(response.data)
+        ? response.data
+        : response.data.users || [];
+
+      console.log('API Response:', response.data);
+      console.log('Users array:', users);
 
       const foundUser = users.find(
         (u) => u.email === email && u.password === password
@@ -146,12 +153,18 @@ export function AuthProvider({ children }) {
         throw new Error("Invalid work email or password");
       }
 
+      console.log('Found user:', foundUser);
+      console.log('User role from API:', foundUser.role);
+
       const userData = {
         ...foundUser,
         name: `${foundUser.first_name} ${foundUser.last_name}`,
         role: foundUser.role || 'data_steward', // Ensure role is stored
         loginTime: new Date().toISOString(),
       };
+
+      console.log('User data to store:', userData);
+      console.log('Role in userData:', userData.role);
 
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));

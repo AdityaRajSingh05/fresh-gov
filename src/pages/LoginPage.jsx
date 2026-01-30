@@ -323,10 +323,12 @@ const LoginPage = () => {
     if (result.success) {
       // Route based on user role
       const userRole = result.user?.role || 'data_steward';
-      if (userRole === 'compliance_officer') {
-        navigate('/compliance-dashboard');
+      if (userRole === 'system_admin') {
+        navigate('/compliance-reporting');  // System admin goes to compliance reporting
+      } else if (userRole === 'compliance_officer') {
+        navigate('/governance');  // Compliance officer goes to governance
       } else {
-        navigate('/dashboard');
+        navigate('/dashboard');  // Data steward goes to dashboard
       }
     }
   };
