@@ -61,7 +61,7 @@ function PolicyList({ policies, loading }) {
                             <div>
                                 <div className="text-xs text-muted-foreground mb-1">Datasets</div>
                                 <div className="font-medium text-foreground">
-                                    {policy.datasets?.length || (policy.dataset_id ? 1 : 0)}
+                                    1
                                 </div>
                             </div>
                             <div>
@@ -78,9 +78,9 @@ function PolicyList({ policies, loading }) {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-xs text-muted-foreground mb-1">Last Reviewed</div>
+                                <div className="text-xs text-muted-foreground mb-1">Created At</div>
                                 <div className="font-medium text-foreground text-xs">
-                                    {new Date(policy.lastReviewed).toLocaleDateString()}
+                                    {new Date(policy.createdAt).toLocaleDateString()}
                                 </div>
                             </div>
                         </div>
@@ -113,7 +113,7 @@ function PolicyList({ policies, loading }) {
                                     Violations
                                 </th>
                                 <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                                    Last Reviewed
+                                    Created At
                                 </th>
                             </tr>
                         </thead>
@@ -137,7 +137,7 @@ function PolicyList({ policies, loading }) {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-sm text-foreground text-center whitespace-nowrap">
-                                        {policy.datasets?.length || (policy.dataset_id ? 1 : 0)}
+                                        1
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center whitespace-nowrap">
                                         {policy.violations > 0 ? (
@@ -150,7 +150,7 @@ function PolicyList({ policies, loading }) {
                                         )}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                                        {new Date(policy.lastReviewed).toLocaleDateString()}
+                                        {new Date(policy.createdAt).toLocaleDateString()}
                                     </td>
                                 </tr>
                             ))}

@@ -296,7 +296,7 @@ function App() {
           />
 
           <Route
-            path="/governance/create"
+            path="/create"
             element={
               <ProtectedRoute>
                 <CreatePolicy />

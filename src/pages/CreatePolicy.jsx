@@ -17,7 +17,7 @@ const CreatePolicy = () => {
         name: '',
         type: 'RETENTION',
         description: '',
-        selectedDatasets: [],
+        selectedDataset: null, // Changed to single dataset
         rules: '',
         retention_days: 90,
         maskingFields: []
@@ -56,8 +56,8 @@ const CreatePolicy = () => {
                 }
                 return true;
             case 2:
-                if (formData.selectedDatasets.length === 0) {
-                    toast.error('Please select at least one dataset');
+                if (!formData.selectedDataset) {
+                    toast.error('Please select a dataset');
                     return false;
                 }
                 return true;
@@ -74,7 +74,7 @@ const CreatePolicy = () => {
                 name: formData.name,
                 type: formData.type,
                 description: formData.description,
-                dataset_ids: formData.selectedDatasets,
+                dataset_ids: formData.selectedDataset ? [formData.selectedDataset] : [],
                 status: 'Active',
                 created_date: new Date().toISOString().split('T')[0]
             };
@@ -97,12 +97,10 @@ const CreatePolicy = () => {
         }
     };
 
-    const toggleDataset = (datasetId) => {
+    const selectDataset = (datasetId) => {
         setFormData(prev => ({
             ...prev,
-            selectedDatasets: prev.selectedDatasets.includes(datasetId)
-                ? prev.selectedDatasets.filter(id => id !== datasetId)
-                : [...prev.selectedDatasets, datasetId]
+            selectedDataset: prev.selectedDataset === datasetId ? null : datasetId
         }));
     };
 
@@ -215,13 +213,13 @@ const CreatePolicy = () => {
                             {/* Step 2: Dataset Selection */}
                             {currentStep === 2 && (
                                 <div className="space-y-4">
-                                    <p className="text-sm text-slate-600 mb-4">Select the datasets this policy will apply to:</p>
+                                    <p className="text-sm text-slate-600 mb-4">Select the dataset this policy will apply to (one policy per dataset):</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
                                         {datasets.map(dataset => (
                                             <div
                                                 key={dataset.id}
-                                                onClick={() => toggleDataset(dataset.id)}
-                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.selectedDatasets.includes(dataset.id)
+                                                onClick={() => selectDataset(dataset.id)}
+                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.selectedDataset === dataset.id
                                                     ? 'border-blue-600 bg-blue-50'
                                                     : 'border-slate-200 hover:border-blue-300'
                                                     }`}
@@ -231,7 +229,7 @@ const CreatePolicy = () => {
                                                         <h4 className="font-bold text-slate-900">{dataset.name}</h4>
                                                         <p className="text-xs text-slate-500 mt-1">{dataset.classification}</p>
                                                     </div>
-                                                    {formData.selectedDatasets.includes(dataset.id) && (
+                                                    {formData.selectedDataset === dataset.id && (
                                                         <FiCheck className="text-blue-600" size={20} />
                                                     )}
                                                 </div>
@@ -239,7 +237,7 @@ const CreatePolicy = () => {
                                         ))}
                                     </div>
                                     <p className="text-xs text-slate-500 mt-4">
-                                        {formData.selectedDatasets.length} dataset(s) selected
+                                        {formData.selectedDataset ? '1 dataset selected' : 'No dataset selected'}
                                     </p>
                                 </div>
                             )}
@@ -321,8 +319,12 @@ const CreatePolicy = () => {
                                         </div>
 
                                         <div className="bg-slate-50 rounded-lg p-4">
-                                            <p className="text-xs font-bold text-slate-500 uppercase mb-1">Selected Datasets</p>
-                                            <p className="text-slate-900 font-semibold">{formData.selectedDatasets.length} dataset(s)</p>
+                                            <p className="text-xs font-bold text-slate-500 uppercase mb-1">Selected Dataset</p>
+                                            <p className="text-slate-900 font-semibold">
+                                                {formData.selectedDataset
+                                                    ? datasets.find(d => d.id === formData.selectedDataset)?.name || 'Dataset ID: ' + formData.selectedDataset
+                                                    : 'None'}
+                                            </p>
                                         </div>
 
                                         {formData.type === 'RETENTION' && (

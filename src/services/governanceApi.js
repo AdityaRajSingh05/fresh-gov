@@ -53,13 +53,16 @@ function transformPolicy(policy) {
     return {
         id: String(policy.id),
         policyId: `POL-${String(policy.id).padStart(3, '0')}`,
-        name: policy.description || 'Untitled Policy',
-        policyType: policy.policy_type || 'GENERAL',
+        name: policy.name || policy.description || 'Untitled Policy',
+        // Handle both policy_type and type fields from backend
+        policyType: policy.policy_type || policy.type || 'RETENTION',
         status: policy.status === 'ACTIVE' ? 'Active' :
-            policy.status === 'VIOLATED' ? 'Violated' : 'Inactive',
+            policy.status === 'Active' ? 'Active' :
+                policy.status === 'VIOLATED' ? 'Violated' : 'Inactive',
         // Convert backend dataset_id (int) to frontend datasets (array of strings)
-        datasets: policy.dataset_id ? [String(policy.dataset_id)] : [],
-        lastReviewed: policy.last_reviewed || new Date().toISOString().split('T')[0],
+        datasets: policy.dataset_id ? [String(policy.dataset_id)] :
+            policy.dataset_ids || [],
+        createdAt: policy.created_at || policy.created_date || new Date().toISOString().split('T')[0],
         violations: policy.status === 'VIOLATED' ? 1 : 0,
         retentionDays: policy.retention_days,
         maskingFields: policy.masking_fields || []
@@ -99,10 +102,15 @@ export async function createPolicy(policy) {
         status: policy.status === 'Active' ? 'ACTIVE' : 'INACTIVE',
         last_reviewed: new Date().toISOString().split('T')[0],
         description: policy.name,
-        created_at: new Date().toISOString(),
-        retention_days: policy.retentionDays,
-        masking_fields: policy.maskingFields
+        created_at: new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]
     };
+
+    // Add type-specific fields
+    if (policy.policyType === 'RETENTION') {
+        serverPolicy.retention_days = policy.retentionDays || 90;
+    } else if (policy.policyType === 'MASKING') {
+        serverPolicy.masking_fields = policy.maskingFields || [];
+    }
 
     const response = await api.post('/governance_policy', serverPolicy);
     return { data: transformPolicy(response.data) };

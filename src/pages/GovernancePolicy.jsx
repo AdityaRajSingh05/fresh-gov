@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FiPlus, FiAlertCircle } from 'react-icons/fi';
 
 import Sidebar from '../components/Sidebar';
@@ -16,6 +17,7 @@ import {
 } from '../services/governanceApi';
 
 function GovernancePolicy() {
+    const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
     const [policies, setPolicies] = useState([]);
     const [datasets, setDatasets] = useState([]);
@@ -151,7 +153,7 @@ function GovernancePolicy() {
                             </p>
                         </div>
                         <button
-                            onClick={() => window.location.href = '/governance/create'}
+                            onClick={() => navigate('/create')}
                             className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium text-sm shadow-sm"
                         >
                             <FiPlus size={20} />
