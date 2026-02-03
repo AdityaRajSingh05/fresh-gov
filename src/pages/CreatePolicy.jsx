@@ -2,91 +2,82 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { FiCheck, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
+import { FiCheck, FiArrowLeft } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
 const CreatePolicy = () => {
     const navigate = useNavigate();
-    const [currentStep, setCurrentStep] = useState(1);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [datasets, setDatasets] = useState([]);
 
     // Form data
     const [formData, setFormData] = useState({
-        name: '',
-        type: 'RETENTION',
+        policyType: '',
+        selectedDataset: '',
         description: '',
-        selectedDataset: null, // Changed to single dataset
-        rules: '',
-        retention_days: 90,
-        maskingFields: []
+        retentionMonths: '',
+        retentionDays: '',
+        isDatasetMasked: false
     });
 
-    const steps = [
-        { number: 1, title: 'Policy Details' },
-        { number: 2, title: 'Dataset Selection' },
-        { number: 3, title: 'Rules & Conditions' },
-        { number: 4, title: 'Review & Submit' }
-    ];
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        // Fetch datasets for step 2
+        // Fetch datasets
         axios.get('http://localhost:3000/api/v1/datasets')
             .then(res => setDatasets(res.data))
             .catch(err => console.error('Error fetching datasets:', err));
     }, []);
 
-    const handleNext = () => {
-        if (validateStep()) {
-            setCurrentStep(prev => Math.min(prev + 1, 4));
-        }
-    };
+    const validateForm = () => {
+        const newErrors = {};
 
-    const handlePrevious = () => {
-        setCurrentStep(prev => Math.max(prev - 1, 1));
-    };
-
-    const validateStep = () => {
-        switch (currentStep) {
-            case 1:
-                if (!formData.name.trim()) {
-                    toast.error('Policy name is required');
-                    return false;
-                }
-                return true;
-            case 2:
-                if (!formData.selectedDataset) {
-                    toast.error('Please select a dataset');
-                    return false;
-                }
-                return true;
-            case 3:
-                return true; // Rules are optional
-            default:
-                return true;
+        if (!formData.policyType) {
+            newErrors.policyType = 'Policy type is required';
         }
+
+        if (!formData.selectedDataset) {
+            newErrors.selectedDataset = 'Dataset selection is required';
+        }
+
+        const totalDays = (Number(formData.retentionMonths) || 0) * 30 + (Number(formData.retentionDays) || 0);
+        if (totalDays <= 0) {
+            newErrors.retentionPeriod = 'Retention period is required (enter months and/or days)';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
-        try {
-            const policyData = {
-                name: formData.name,
-                type: formData.type,
-                description: formData.description,
-                dataset_ids: formData.selectedDataset ? [formData.selectedDataset] : [],
-                status: 'Active',
-                created_date: new Date().toISOString().split('T')[0]
-            };
+        if (!validateForm()) {
+            return;
+        }
 
-            // Add type-specific fields
-            if (formData.type === 'RETENTION') {
-                policyData.retention_days = formData.retention_days;
-                policyData.rules = `Data will be automatically deleted after ${formData.retention_days} days`;
-            } else if (formData.type === 'MASKING') {
-                policyData.masking_fields = formData.maskingFields;
-                policyData.rules = formData.maskingFields.join(', ');
-            }
+        try {
+            // Calculate total retention days from months and days
+            const retentionDays = (Number(formData.retentionMonths) || 0) * 30 + (Number(formData.retentionDays) || 0);
+
+            // Get current timestamp in local timezone
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+            const policyData = {
+                dataset_id: Number(formData.selectedDataset),
+                policy_type: formData.policyType,
+                status: 'ACTIVE',
+                description: formData.description || `${formData.policyType} compliance policy`,
+                created_at: timestamp,
+                retention_days: retentionDays,
+                is_masked: formData.isDatasetMasked
+            };
 
             await axios.post('http://localhost:3000/api/v1/governance_policy', policyData);
             toast.success('Policy created successfully!');
@@ -97,19 +88,12 @@ const CreatePolicy = () => {
         }
     };
 
-    const selectDataset = (datasetId) => {
-        setFormData(prev => ({
-            ...prev,
-            selectedDataset: prev.selectedDataset === datasetId ? null : datasetId
-        }));
-    };
-
     return (
         <div className="flex min-h-screen bg-[#f8fafc] font-inter">
             <Sidebar isOpen={isSidebarOpen} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <Header />
+                <Header hideSearch hideViolations />
 
                 <main className="flex-1 p-6 lg:p-10">
                     <div className="max-w-4xl mx-auto">
@@ -128,256 +112,152 @@ const CreatePolicy = () => {
                             <p className="text-slate-500 mt-2">Define and configure a new governance policy</p>
                         </div>
 
-                        {/* Step Indicator */}
-                        <div className="mb-10">
-                            <div className="flex items-center justify-between">
-                                {steps.map((step, index) => (
-                                    <React.Fragment key={step.number}>
-                                        <div className="flex flex-col items-center">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${currentStep > step.number
-                                                ? 'bg-green-500 text-white'
-                                                : currentStep === step.number
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-slate-200 text-slate-400'
-                                                }`}>
-                                                {currentStep > step.number ? <FiCheck /> : step.number}
-                                            </div>
-                                            <span className={`mt-2 text-xs font-semibold ${currentStep >= step.number ? 'text-slate-900' : 'text-slate-400'
-                                                }`}>
-                                                {step.title}
-                                            </span>
-                                        </div>
-                                        {index < steps.length - 1 && (
-                                            <div className={`flex-1 h-1 mx-4 rounded transition-all ${currentStep > step.number ? 'bg-green-500' : 'bg-slate-200'
-                                                }`} />
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                            </div>
-                        </div>
-
                         {/* Form Content */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-
-                            {/* Step 1: Policy Details */}
-                            {currentStep === 1 && (
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Policy Name *</label>
-                                        <input
-                                            type="text"
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            placeholder="e.g., Customer Data Retention Policy"
-                                            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Policy Type *</label>
-                                        <select
-                                            value={formData.type}
-                                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                                        >
-                                            <option value="RETENTION">Retention</option>
-                                            <option value="MASKING">Masking</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Description</label>
-                                        <textarea
-                                            value={formData.description}
-                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            placeholder="Describe the purpose and scope of this policy..."
-                                            rows={4}
-                                            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                                        />
-                                    </div>
-
-                                    {formData.type === 'RETENTION' && (
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">Retention Period (days)</label>
-                                            <input
-                                                type="number"
-                                                value={formData.retention_days}
-                                                onChange={(e) => setFormData({ ...formData, retention_days: parseInt(e.target.value) })}
-                                                className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                                            />
-                                        </div>
+                            <div className="space-y-6">
+                                {/* Policy Type Dropdown */}
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        Policy Type <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={formData.policyType}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, policyType: e.target.value });
+                                            const newErrors = { ...errors };
+                                            delete newErrors.policyType;
+                                            setErrors(newErrors);
+                                        }}
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    >
+                                        <option value="">Select policy type</option>
+                                        <option value="GDPR">GDPR</option>
+                                        <option value="ISO 27001">ISO 27001</option>
+                                    </select>
+                                    {errors.policyType && (
+                                        <p className="text-sm text-red-500 mt-1">{errors.policyType}</p>
                                     )}
                                 </div>
-                            )}
 
-                            {/* Step 2: Dataset Selection */}
-                            {currentStep === 2 && (
-                                <div className="space-y-4">
-                                    <p className="text-sm text-slate-600 mb-4">Select the dataset this policy will apply to (one policy per dataset):</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-                                        {datasets.map(dataset => (
-                                            <div
-                                                key={dataset.id}
-                                                onClick={() => selectDataset(dataset.id)}
-                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.selectedDataset === dataset.id
-                                                    ? 'border-blue-600 bg-blue-50'
-                                                    : 'border-slate-200 hover:border-blue-300'
-                                                    }`}
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div>
-                                                        <h4 className="font-bold text-slate-900">{dataset.name}</h4>
-                                                        <p className="text-xs text-slate-500 mt-1">{dataset.classification}</p>
-                                                    </div>
-                                                    {formData.selectedDataset === dataset.id && (
-                                                        <FiCheck className="text-blue-600" size={20} />
-                                                    )}
-                                                </div>
-                                            </div>
+                                {/* Dataset Dropdown */}
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        Dataset <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={formData.selectedDataset}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, selectedDataset: e.target.value });
+                                            const newErrors = { ...errors };
+                                            delete newErrors.selectedDataset;
+                                            setErrors(newErrors);
+                                        }}
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    >
+                                        <option value="">Select dataset</option>
+                                        {datasets.map((dataset) => (
+                                            <option key={dataset.id} value={dataset.id}>
+                                                {dataset.name} {dataset.classification ? `(${dataset.classification})` : ''}
+                                            </option>
                                         ))}
+                                    </select>
+                                    {errors.selectedDataset && (
+                                        <p className="text-sm text-red-500 mt-1">{errors.selectedDataset}</p>
+                                    )}
+                                </div>
+
+                                {/* Description (Optional) */}
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        Description <span className="text-slate-400 text-xs font-normal">(Optional)</span>
+                                    </label>
+                                    <textarea
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        placeholder="Enter policy description..."
+                                        rows={3}
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                                    />
+                                </div>
+
+                                {/* Retention Period */}
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-3">
+                                        Retention Period <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="flex items-center gap-8">
+                                        {/* Months */}
+                                        <div>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="Months"
+                                                value={formData.retentionMonths}
+                                                onChange={(e) => {
+                                                    setFormData({
+                                                        ...formData,
+                                                        retentionMonths: e.target.value
+                                                    });
+                                                    const newErrors = { ...errors };
+                                                    delete newErrors.retentionPeriod;
+                                                    setErrors(newErrors);
+                                                }}
+                                                className="w-40 px-4 py-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                            />
+                                        </div>
+
+                                        {/* Days */}
+                                        <div>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="Days"
+                                                value={formData.retentionDays}
+                                                onChange={(e) => {
+                                                    setFormData({
+                                                        ...formData,
+                                                        retentionDays: e.target.value
+                                                    });
+                                                    const newErrors = { ...errors };
+                                                    delete newErrors.retentionPeriod;
+                                                    setErrors(newErrors);
+                                                }}
+                                                className="w-40 px-4 py-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                            />
+                                        </div>
+
+                                        {/* Dataset is Masked Checkbox */}
+                                        <div className="flex items-center">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isDatasetMasked}
+                                                    onChange={(e) => setFormData({ ...formData, isDatasetMasked: e.target.checked })}
+                                                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                                                />
+                                                <span className="text-sm font-medium text-slate-700">Dataset is Masked</span>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-4">
-                                        {formData.selectedDataset ? '1 dataset selected' : 'No dataset selected'}
+                                    {errors.retentionPeriod && (
+                                        <p className="text-sm text-red-500 mt-2">{errors.retentionPeriod}</p>
+                                    )}
+                                    <p className="text-xs text-slate-500 mt-3 flex items-center gap-1">
+                                        <span className="inline-block w-4 h-4 rounded-full bg-blue-100 text-blue-600 text-center leading-4 font-bold text-xs">i</span>
+                                        <strong>Tip:</strong> Ensure all fields with * are filled
                                     </p>
                                 </div>
-                            )}
 
-                            {/* Step 3: Rules & Conditions */}
-                            {currentStep === 3 && (
-                                <div className="space-y-6">
-                                    <h3 className="text-lg font-bold text-slate-900">Configure Policy Rules</h3>
-
-                                    {formData.type === 'RETENTION' && (
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                                Retention Period (Days)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={formData.retention_days}
-                                                onChange={(e) => setFormData({ ...formData, retention_days: parseInt(e.target.value) || 90 })}
-                                                min="1"
-                                                className="w-full md:w-48 px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                                            />
-                                            <p className="text-sm text-slate-500 mt-2">
-                                                Data will be automatically deleted after {formData.retention_days} days
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {formData.type === 'MASKING' && (
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                                Fields to Mask
-                                            </label>
-                                            <div className="space-y-3">
-                                                {['email', 'phone', 'ssn', 'credit_card'].map((field) => (
-                                                    <label key={field} className="flex items-center gap-3">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={formData.maskingFields?.includes(field)}
-                                                            onChange={(e) => {
-                                                                const fields = e.target.checked
-                                                                    ? [...(formData.maskingFields || []), field]
-                                                                    : (formData.maskingFields || []).filter((f) => f !== field);
-                                                                setFormData({ ...formData, maskingFields: fields, rules: fields.join(', ') });
-                                                            }}
-                                                            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-                                                        />
-                                                        <span className="text-sm text-slate-700 capitalize font-medium">
-                                                            {field.replace('_', ' ')}
-                                                        </span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Step 4: Review & Submit */}
-                            {currentStep === 4 && (
-                                <div className="space-y-6">
-                                    <h3 className="text-lg font-bold text-slate-900 mb-4">Review Policy Details</h3>
-
-                                    <div className="space-y-4">
-                                        <div className="bg-slate-50 rounded-lg p-4">
-                                            <p className="text-xs font-bold text-slate-500 uppercase mb-1">Policy Name</p>
-                                            <p className="text-slate-900 font-semibold">{formData.name}</p>
-                                        </div>
-
-                                        <div className="bg-slate-50 rounded-lg p-4">
-                                            <p className="text-xs font-bold text-slate-500 uppercase mb-1">Type</p>
-                                            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-sm font-bold">
-                                                {formData.type}
-                                            </span>
-                                        </div>
-
-                                        <div className="bg-slate-50 rounded-lg p-4">
-                                            <p className="text-xs font-bold text-slate-500 uppercase mb-1">Description</p>
-                                            <p className="text-slate-700 text-sm">{formData.description}</p>
-                                        </div>
-
-                                        <div className="bg-slate-50 rounded-lg p-4">
-                                            <p className="text-xs font-bold text-slate-500 uppercase mb-1">Selected Dataset</p>
-                                            <p className="text-slate-900 font-semibold">
-                                                {formData.selectedDataset
-                                                    ? datasets.find(d => d.id === formData.selectedDataset)?.name || 'Dataset ID: ' + formData.selectedDataset
-                                                    : 'None'}
-                                            </p>
-                                        </div>
-
-                                        {formData.type === 'RETENTION' && (
-                                            <div className="bg-slate-50 rounded-lg p-4">
-                                                <p className="text-xs font-bold text-slate-500 uppercase mb-1">Retention Period</p>
-                                                <p className="text-slate-900 font-semibold">{formData.retention_days} days</p>
-                                            </div>
-                                        )}
-
-                                        {formData.type === 'MASKING' && formData.maskingFields.length > 0 && (
-                                            <div className="bg-slate-50 rounded-lg p-4">
-                                                <p className="text-xs font-bold text-slate-500 uppercase mb-1">Fields to Mask</p>
-                                                <div className="flex flex-wrap gap-2 mt-2">
-                                                    {formData.maskingFields.map((field) => (
-                                                        <span
-                                                            key={field}
-                                                            className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-md capitalize font-semibold"
-                                                        >
-                                                            {field.replace('_', ' ')}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Navigation Buttons */}
-                            <div className="flex justify-between mt-8 pt-6 border-t border-slate-200">
-                                <button
-                                    onClick={handlePrevious}
-                                    disabled={currentStep === 1}
-                                    className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg font-bold hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                    <FiArrowLeft className="inline mr-2" /> Previous
-                                </button>
-
-                                {currentStep < 4 ? (
-                                    <button
-                                        onClick={handleNext}
-                                        className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all"
-                                    >
-                                        Next <FiArrowRight className="inline ml-2" />
-                                    </button>
-                                ) : (
+                                {/* Submit Button */}
+                                <div className="flex justify-end pt-6 border-t border-slate-200 mt-8">
                                     <button
                                         onClick={handleSubmit}
-                                        className="px-6 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all"
+                                        className="px-8 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center gap-2"
                                     >
-                                        <FiCheck className="inline mr-2" /> Submit Policy
+                                        <FiCheck size={18} />
+                                        Submit Policy
                                     </button>
-                                )}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -14,7 +14,7 @@ import {
     getDatasets,
     createPolicy,
     getPolicyStats
-} from '../services/governanceApi';
+} from '../api/Governance';
 
 function GovernancePolicy() {
     const navigate = useNavigate();
@@ -40,19 +40,25 @@ function GovernancePolicy() {
 
         const query = searchQuery.toLowerCase().trim();
         return policies.filter(policy => {
+            // Get dataset name from datasets array
+            const datasetName = policy.datasets && policy.datasets.length > 0
+                ? datasets.find(d => String(d.id) === String(policy.datasets[0]))?.name || ''
+                : '';
+
             // Convert all fields to searchable strings
             const searchableFields = [
                 String(policy.id || ''),
                 String(policy.policyId || ''),
                 String(policy.name || ''),
                 String(policy.policyType || ''),
-                String(policy.status || '')
+                String(policy.status || ''),
+                String(datasetName)  // Added dataset name
             ].map(field => field.toLowerCase());
 
             // Simple substring match for all fields
             return searchableFields.some(field => field.includes(query));
         });
-    }, [policies, searchQuery]);
+    }, [policies, searchQuery, datasets]);
 
     // Load data on mount
     useEffect(() => {
@@ -97,20 +103,7 @@ function GovernancePolicy() {
 
     const handleWizardSubmit = async (wizardData) => {
         try {
-            // Transform wizard data to API format (Frontend Model)
-            const policyPayload = {
-                name: wizardData.name,
-                policyType: wizardData.policyType,
-                // If editing, preserve existing status.
-                // Status is ALWAYS Active for new policies (Datasets are mandatory)
-                status: 'Active',
-                datasets: wizardData.selectedDatasets,
-                retentionDays: wizardData.retentionDays,
-                maskingFields: wizardData.maskingFields
-            };
-
-            await createPolicy(policyPayload);
-
+            await createPolicy(wizardData);
             await loadData(); // Reload data to show changes
             setIsWizardOpen(false);
         } catch (error) {
@@ -208,6 +201,7 @@ function GovernancePolicy() {
                                 <PolicyList
                                     policies={filteredPolicies}
                                     loading={loading}
+                                    datasets={datasets}
                                 />
                             </div>
                         </>

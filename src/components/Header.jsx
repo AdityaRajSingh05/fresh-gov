@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:3000/api/v1';
 
-function Header({ searchValue, onSearchChange, searchPlaceholder }) {
+function Header({ searchValue, onSearchChange, searchPlaceholder, hideSearch, hideViolations }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [violationCount, setViolationCount] = useState(0);
@@ -39,27 +39,29 @@ function Header({ searchValue, onSearchChange, searchPlaceholder }) {
 
 
   return (
-    <header className="flex w-full justify-between gap-6 py-4 px-6 bg-background">
-      {/* Search Bar Section */}
-      <div className="flex w-full border border-input rounded-md relative">
-        <FiSearch
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-          size={20}
-        />
-        <input
-          type="text"
-          value={searchValue || ''}
-          onChange={onSearchChange}
-          placeholder={searchPlaceholder || "Search..."}
-          className="search-input"
-        />
-      </div>
+    <header className={`flex w-full gap-6 py-4 px-6 bg-background ${hideSearch ? 'justify-end' : 'justify-between'}`}>
+      {/* Search Bar Section - Conditionally rendered */}
+      {!hideSearch && (
+        <div className="flex w-full border border-input rounded-md relative">
+          <FiSearch
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+            size={20}
+          />
+          <input
+            type="text"
+            value={searchValue || ''}
+            onChange={onSearchChange}
+            placeholder={searchPlaceholder || "Search..."}
+            className="search-input"
+          />
+        </div>
+      )}
 
       {/* User Actions Section */}
       <div className="flex items-center gap-4 min-w-max">
         {/* Violation Count Badge - Only for Compliance Officers */}
         {/* Violation Count Badge - Only for Compliance Officers */}
-        {user?.role === 'compliance_officer' && violationCount > 0 && (
+        {!hideViolations && user?.role === 'compliance_officer' && violationCount > 0 && (
           <div
             className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg border border-red-200"
             title="Active violations"

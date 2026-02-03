@@ -1,6 +1,12 @@
 import { FiAlertCircle } from 'react-icons/fi';
 
-function PolicyList({ policies, loading }) {
+function PolicyList({ policies, loading, datasets = [] }) {
+    // Helper function to get dataset name by ID
+    const getDatasetName = (datasetId) => {
+        const dataset = datasets.find(d => String(d.id) === String(datasetId));
+        return dataset ? dataset.name : `Dataset ${datasetId}`;
+    };
+
     if (loading) {
         return (
             <div className="bg-card rounded-lg p-8 text-center shadow-sm">
@@ -25,8 +31,8 @@ function PolicyList({ policies, loading }) {
 
     const getPolicyTypeColor = (type) => {
         const colors = {
-            'RETENTION': 'text-blue-600',
-            'MASKING': 'text-purple-600'
+            'GDPR': 'text-blue-600',
+            'ISO 27001': 'text-purple-600'
         };
         return colors[type] || 'text-gray-600';
     };
@@ -39,12 +45,9 @@ function PolicyList({ policies, loading }) {
                     <div key={policy.id} className="bg-card rounded-lg p-4 shadow-sm">
                         <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                                <div className="text-xs font-medium text-muted-foreground mb-1">
+                                <div className="text-xs font-medium text-muted-foreground">
                                     {policy.policyId}
                                 </div>
-                                <h3 className="font-semibold text-foreground text-sm">
-                                    {policy.name}
-                                </h3>
                             </div>
                             <span className={`text-xs ${getStatusColor(policy.status)}`}>
                                 {policy.status}
@@ -59,9 +62,9 @@ function PolicyList({ policies, loading }) {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-xs text-muted-foreground mb-1">Datasets</div>
-                                <div className="font-medium text-foreground">
-                                    1
+                                <div className="text-xs text-muted-foreground mb-1">Dataset</div>
+                                <div className="font-medium text-foreground text-xs">
+                                    {policy.datasets && policy.datasets.length > 0 ? getDatasetName(policy.datasets[0]) : 'N/A'}
                                 </div>
                             </div>
                             <div>
@@ -97,17 +100,14 @@ function PolicyList({ policies, loading }) {
                                 <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
                                     Policy ID
                                 </th>
-                                <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider min-w-[200px]">
-                                    Name
-                                </th>
                                 <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
                                     Type
                                 </th>
                                 <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
                                     Status
                                 </th>
-                                <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center whitespace-nowrap">
-                                    Datasets
+                                <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                                    Dataset Name
                                 </th>
                                 <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center whitespace-nowrap">
                                     Violations
@@ -123,9 +123,6 @@ function PolicyList({ policies, loading }) {
                                     <td className="px-4 py-3 text-sm font-medium text-foreground whitespace-nowrap">
                                         {policy.policyId}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-foreground">
-                                        {policy.name}
-                                    </td>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">
                                         <span className={`font-medium ${getPolicyTypeColor(policy.policyType)}`}>
                                             {policy.policyType}
@@ -136,8 +133,8 @@ function PolicyList({ policies, loading }) {
                                             {policy.status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-foreground text-center whitespace-nowrap">
-                                        1
+                                    <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
+                                        {policy.datasets && policy.datasets.length > 0 ? getDatasetName(policy.datasets[0]) : 'N/A'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center whitespace-nowrap">
                                         {policy.violations > 0 ? (
