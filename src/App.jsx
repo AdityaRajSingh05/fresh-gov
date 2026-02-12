@@ -211,8 +211,8 @@ import NotFoundPage from './pages/NotFoundPage';
 
 // Import Compliance Pages
 // ComplianceDashboard and Violations removed as they are unused
-import GovernancePolicy from './pages/GovernancePolicy';
-import CreatePolicy from './pages/CreatePolicy';
+import ComplianceDashboard from './pages/ComplianceDashboard';
+import ReviewPolicy from './pages/ReviewPolicy';
 import DataQualityDashboard from './pages/DataQualityDashboard';
 import QualityBatchList from './pages/QualityBatchList';
 import ComplianceReporting from './pages/ComplianceReporting';
@@ -290,16 +290,16 @@ function App() {
             path="/governance"
             element={
               <ProtectedRoute>
-                <GovernancePolicy />
+                <ComplianceDashboard />
               </ProtectedRoute>
             }
           />
 
           <Route
-            path="/create"
+            path="/review-policy"
             element={
               <ProtectedRoute>
-                <CreatePolicy />
+                <ReviewPolicy />
               </ProtectedRoute>
             }
           />

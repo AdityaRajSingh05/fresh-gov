@@ -360,8 +360,8 @@ const dataStewardNavItems = [
 
 // Compliance Officer Navigation Items
 const complianceOfficerNavItems = [
-  { id: 'governance', label: 'Governance & Policy', icon: <FiShield size={22} />, path: '/governance' },
-  { id: 'create-policy', label: 'Create Policy', icon: <FiFileText size={22} />, path: '/create' },
+  { id: 'governance', label: 'Compliance Dashboard', icon: <FiShield size={22} />, path: '/governance' },
+  { id: 'review-policy', label: 'Review Policy', icon: <FiFileText size={22} />, path: '/review-policy' },
 ];
 
 // System Admin Navigation Items

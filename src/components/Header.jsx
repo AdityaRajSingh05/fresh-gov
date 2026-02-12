@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:3000/api/v1';
 
-function Header({ searchValue, onSearchChange, searchPlaceholder, hideSearch, hideViolations }) {
+function Header({ searchValue, onSearchChange, searchPlaceholder, hideSearch }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [violationCount, setViolationCount] = useState(0);
@@ -16,13 +16,18 @@ function Header({ searchValue, onSearchChange, searchPlaceholder, hideSearch, hi
     if (user?.role === 'compliance_officer') {
       fetchViolationCount();
     }
+
+    // Re-fetch when a review is edited in the dashboard
+    const handler = () => fetchViolationCount();
+    window.addEventListener('compliance-updated', handler);
+    return () => window.removeEventListener('compliance-updated', handler);
   }, [user]);
 
   const fetchViolationCount = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/governance_policy`);
-      const policies = response.data || [];
-      const violations = policies.filter(policy => policy.status === 'VIOLATED');
+      const response = await axios.get(`${API_BASE_URL}/compliance_reviews`);
+      const reviews = response.data || [];
+      const violations = reviews.filter(r => r.policy_status === 'Violated');
       setViolationCount(violations.length);
     } catch (error) {
       console.error('Error fetching violation count:', error);
@@ -39,7 +44,7 @@ function Header({ searchValue, onSearchChange, searchPlaceholder, hideSearch, hi
 
 
   return (
-    <header className={`flex w-full gap-6 py-4 px-6 bg-background ${hideSearch ? 'justify-end' : 'justify-between'}`}>
+    <header className={`flex w-full gap-6 py-6 px-6 bg-background ${hideSearch ? 'justify-end' : 'justify-between'}`} style={{ borderBottom: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       {/* Search Bar Section - Conditionally rendered */}
       {!hideSearch && (
         <div className="flex w-full border border-input rounded-md relative">
@@ -61,14 +66,19 @@ function Header({ searchValue, onSearchChange, searchPlaceholder, hideSearch, hi
       <div className="flex items-center gap-4 min-w-max">
         {/* Violation Count Badge - Only for Compliance Officers */}
         {/* Violation Count Badge - Only for Compliance Officers */}
-        {!hideViolations && user?.role === 'compliance_officer' && violationCount > 0 && (
+        {user?.role === 'compliance_officer' && (
           <div
-            className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg border border-red-200"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '6px 14px', borderRadius: '20px',
+              border: '1.5px solid #fca5a5', background: '#fff',
+              color: '#dc2626', fontSize: '0.8rem', fontWeight: 600,
+              fontFamily: 'Inter, system-ui, sans-serif'
+            }}
             title="Active violations"
           >
-            <FiAlertCircle size={16} />
-            <span className="hidden sm:inline text-sm font-semibold">{violationCount} Violation{violationCount > 1 ? 's' : ''}</span>
-            <span className="sm:hidden text-sm font-semibold">{violationCount}</span>
+            <FiAlertCircle size={15} />
+            <span>{violationCount} Violation{violationCount > 1 ? 's' : ''}</span>
           </div>
         )}
 

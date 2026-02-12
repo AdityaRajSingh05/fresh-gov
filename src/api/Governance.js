@@ -124,3 +124,97 @@ export async function getPolicyStats() {
         throw error;
     }
 }
+
+/**
+ * Fetch a single dataset by ID (includes full metadata with governance info)
+ * Server endpoint: GET /api/v1/datasets/:id
+ * @param {string|number} id - Dataset ID
+ * @returns {Promise<{data: Object}>}
+ */
+export async function getDatasetById(id) {
+    const client = Client();
+    try {
+        const response = await client.get(`/datasets/${id}`);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error fetching dataset by ID:', error);
+        throw error;
+    }
+}
+
+/**
+ * Submit a compliance review
+ * Server endpoint: POST /api/v1/compliance_reviews
+ * @param {Object} reviewData - Review data
+ * @returns {Promise<{data: Object}>}
+ */
+export async function submitComplianceReview(reviewData) {
+    const client = Client();
+    try {
+        const response = await client.post('/compliance_reviews', reviewData);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error submitting compliance review:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fetch all compliance reviews
+ * Server endpoint: GET /api/v1/compliance_reviews
+ */
+export async function getComplianceReviews() {
+    const client = Client();
+    try {
+        const response = await client.get('/compliance_reviews');
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error fetching compliance reviews:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fetch a single compliance review by ID
+ * Server endpoint: GET /api/v1/compliance_reviews/:id
+ */
+export async function getComplianceReviewById(id) {
+    const client = Client();
+    try {
+        const response = await client.get(`/compliance_reviews/${id}`);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error fetching compliance review by ID:', error);
+        throw error;
+    }
+}
+
+/**
+ * Update a compliance review
+ * Server endpoint: PUT /api/v1/compliance_reviews/:id
+ */
+export async function updateComplianceReview(id, data) {
+    const client = Client();
+    try {
+        const response = await client.put(`/compliance_reviews/${id}`, data);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error updating compliance review:', error);
+        throw error;
+    }
+}
+
+/**
+ * Update a dataset (used to sync governance data)
+ * Server endpoint: PUT /api/v1/datasets/:id
+ */
+export async function updateDataset(id, data) {
+    const client = Client();
+    try {
+        const response = await client.put(`/datasets/${id}`, data);
+        return { data: response.data };
+    } catch (error) {
+        console.error('Error updating dataset:', error);
+        throw error;
+    }
+}
