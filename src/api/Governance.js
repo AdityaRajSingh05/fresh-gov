@@ -39,9 +39,8 @@ function transformDataset(dataset) {
  * @returns {Promise<{data: Array}>}
  */
 export async function getPolicies() {
-    const client = Client();
     try {
-        const response = await client.get('/governance_policy');
+        const response = await Client.get('/governance_policy');
         const policies = Array.isArray(response.data) ? response.data : (response.data.governance_policy || []);
         return { data: policies.map(transformPolicy) };
     } catch (error) {
